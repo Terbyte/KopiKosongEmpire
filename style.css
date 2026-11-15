@@ -976,3 +976,56 @@ footer {
 @media (max-width: 620px) {
   .hintpop { width: min(300px, 88vw); font-size: 11.5px; }
 }
+
+/* ---------- brew counter ---------- */
+.brew-count {
+  font-size: 11px;
+  letter-spacing: .5px;
+  color: #d7bb8d;
+  opacity: .85;
+  font-family: monospace;
+}
+
+/* ---------- store ---------- */
+.btn.gold {
+  background: linear-gradient(180deg, #f0b429, #d1931a);
+  color: #22140a; border: 1px solid #f7cf6a; font-weight: 700;
+}
+.btn.gold:disabled { filter: grayscale(.7); opacity: .5; }
+
+.adbox { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.adstat {
+  font-size: 12.5px;
+  background: rgba(0,0,0,.28);
+  border: 1px solid #5c3a24;
+  border-radius: 9px;
+  padding: 8px 12px;
+  color: #d7bb8d;
+}
+.adstat span { color: var(--kuning); font-weight: 700; font-family: monospace; }
+.adbar { height: 6px; background: rgba(0,0,0,.45); border-radius: 4px; margin-top: 12px; overflow: hidden; }
+.adbar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #6a4bb0, #f0b429); transition: width .2s linear; }
+
+/* ---------- offline modal ---------- */
+.offmodal {
+  position: fixed; inset: 0; z-index: 70;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,.6);
+  opacity: 0; pointer-events: none; transition: opacity .25s ease;
+}
+.offmodal.show { opacity: 1; pointer-events: auto; }
+.offcard {
+  text-align: center;
+  padding: 28px 34px 24px;
+  border-radius: 18px;
+  background: linear-gradient(165deg, #40281a, #180e08);
+  border: 2px solid var(--kuning);
+  box-shadow: 0 24px 70px rgba(0,0,0,.8), 0 0 80px rgba(240,180,41,.22);
+  max-width: min(420px, 88vw);
+  transform: scale(.92); transition: transform .3s cubic-bezier(.2,1.4,.4,1);
+}
+.offmodal.show .offcard { transform: scale(1); }
+.officon { font-size: 40px; }
+.offcard h2 { margin: 6px 0 10px; font-size: 15px; letter-spacing: 2px; text-transform: uppercase; color: #e0c79a; }
+.offamount { font-family: monospace; font-size: 30px; color: var(--kuning); text-shadow: 0 0 18px rgba(240,180,41,.5); }
+.offcard .muted { margin: 6px 0 18px; }

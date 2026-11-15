@@ -31,15 +31,16 @@
 </header>
 
 <nav class="tabs" id="tabs">
-  <button data-tab="shop" class="active" id="tabShop">Shop</button>
+  <button data-tab="brew" class="active" id="tabShop">Brew</button>
   <button data-tab="achievements" id="tabAch">Achievements <span class="badge" id="achBadge">0</span></button>
+  <button data-tab="shop" id="tabStore">Shop</button>
   <button data-tab="buffs" id="tabBuffs">Buffs <span class="badge" id="beanBadge">0</span></button>
   <button data-tab="stats" id="tabStats">Stats</button>
   <button data-tab="settings" id="tabSet">Settings</button>
 </nav>
 
 <main>
-  <section class="panel active" id="panel-shop">
+  <section class="panel active" id="panel-brew">
     <div class="counter">
       <button id="brewBtn" class="brew" aria-label="Brew coffee">
         <svg class="ring" viewBox="0 0 240 240" aria-hidden="true">
@@ -62,6 +63,7 @@
         </svg>
         <span class="brew-label" id="brewLabel">BREW KOPI</span>
         <span class="brew-gain" id="clickGain">+ RM 0.05</span>
+        <span class="brew-count" id="brewCount">0 brews</span>
       </button>
 
       <div class="milestones">
@@ -90,6 +92,25 @@
       <h2 id="achTitle">Achievements</h2>
       <p class="muted" id="achSub">Each achievement gives a permanent +1% to all earnings.</p>
       <div id="achList" class="ach-list"></div>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-shop">
+    <div class="card">
+      <h2 id="storeTitle">Shop</h2>
+      <p class="muted" id="storeSub">Bean packs and boosts. Purchases here are simulated — no real payment is taken.</p>
+      <div id="storeItems" class="buffgrid"></div>
+    </div>
+
+    <div class="card">
+      <h2 id="adTitle">Watch an ad — 2× income</h2>
+      <p class="muted" id="adSub">Each ad gives a 2× multiplier for 2 hours. Maximum 10 per day.</p>
+      <div class="adbox">
+        <div class="adstat"><span id="adLeft">10</span> <span id="adLeftLabel">ads left today</span></div>
+        <div class="adstat" id="boostState">No active boost</div>
+        <button id="watchAdBtn" class="btn gold">Watch ad</button>
+      </div>
+      <div class="adbar"><i id="adProgress"></i></div>
     </div>
   </section>
 
@@ -223,6 +244,16 @@
 
   <div class="buildbar" id="verLine">build</div>
 </footer>
+
+<div id="offlineModal" class="offmodal">
+  <div class="offcard">
+    <div class="officon">🌙</div>
+    <h2 id="offTitle">While you were away</h2>
+    <div id="offAmount" class="offamount">RM 0.00</div>
+    <div class="muted" id="offSub">Your kedai kept brewing.</div>
+    <button id="claimOffline" class="btn gold">Claim</button>
+  </div>
+</div>
 
 <div id="achPop" class="achpop" aria-live="polite">
   <div class="achpop-card">

@@ -168,7 +168,7 @@ const T = {
     tagline: 'Small warung, big dreams 🇲🇾',
     rateUnit: 'RM / sec', brew: 'BREW KOPI', notice: 'Notice Board',
     shop: 'Equipment & Outlets', buy: 'BUY',
-    tabShop: 'Shop', tabAch: 'Achievements', tabStats: 'Stats', tabSet: 'Settings', tabBuffs: 'Buffs',
+    tabShop: 'Brew', tabAch: 'Achievements', tabStats: 'Stats', tabSet: 'Settings', tabBuffs: 'Buffs',
     achTitle: 'Achievements', achSub: 'Every tier gives a permanent earnings bonus. Harder tiers give less.',
     achDone: 'Unlocked', achNot: 'Locked',
     statsTitle: 'Statistics',
@@ -200,7 +200,7 @@ const T = {
     tagline: 'Warung kecil, impian besar 🇲🇾',
     rateUnit: 'RM / saat', brew: 'BANCUH KOPI', notice: 'Papan Notis',
     shop: 'Peralatan & Kedai', buy: 'BELI',
-    tabShop: 'Kedai', tabAch: 'Pencapaian', tabStats: 'Statistik', tabSet: 'Tetapan', tabBuffs: 'Berkat',
+    tabShop: 'Bancuh', tabAch: 'Pencapaian', tabStats: 'Statistik', tabSet: 'Tetapan', tabBuffs: 'Berkat',
     achTitle: 'Pencapaian', achSub: 'Setiap tier memberi bonus pendapatan kekal. Tier lebih susah beri lebih sedikit.',
     achDone: 'Dibuka', achNot: 'Belum',
     statsTitle: 'Statistik',
@@ -231,7 +231,7 @@ const T = {
 };
 
 /* ---------------- state ---------------- */
-const VERSION = '2026.11.16-4';
+const VERSION = '2026.11.16-5';
 const SAVE_KEY = 'kopitiam-kosong-v2';
 const OLD_KEY = 'kopitiam-kosong-v1';
 
@@ -245,6 +245,10 @@ let S = {
   ach: {},
   beans: 0,
   buffs: {},
+  boostUntil: 0,
+  adsToday: 0,
+  adsDate: '',
+  purchases: [],
   goals: {},
   soundOn: true,
   lang: 'en',
@@ -255,6 +259,7 @@ let S = {
 BUILDINGS.forEach(b => { S.counts[b.id] = 0; });
 
 let buyAmount = 1;
+let pendingOffline = null;
 let hardReset = false;
 let lastFrame = performance.now();
 let saveTimer = 0;
@@ -275,8 +280,10 @@ function buffIncomeMult() {
   if (hasBuff('bunga')) m += 0.20;
   return m;
 }
+function boostActive() { return S.boostUntil > Date.now(); }
 function mult() {
-  return (1 + S.tokens * 0.1) * (1 + S.bintang * 0.5) * (1 + achBonus() / 100) * buffIncomeMult();
+  return (1 + S.tokens * 0.1) * (1 + S.bintang * 0.5) * (1 + achBonus() / 100) * buffIncomeMult() *
+         (boostActive() ? 2 : 1);
 }
 function clickPower() {
   const tier = 1 + Math.floor(S.clicks / 50);          // +100% base every 50 taps
@@ -567,6 +574,103 @@ function checkAchievements() {
   }
 }
 
+/* ---------------- offline claim ---------------- */
+function showOffline() {
+  if (!pendingOffline || pendingOffline.gain.m === 0) return;
+  $('offAmount').textContent = fmtRM(pendingOffline.gain);
+  const mins = Math.round(pendingOffline.secs / 60);
+  const hrs = Math.floor(mins / 60);
+  const label = hrs > 0
+    ? hrs + (S.lang === 'bm' ? ' jam ' : 'h ') + (mins % 60) + (S.lang === 'bm' ? ' minit' : 'm')
+    : mins + (S.lang === 'bm' ? ' minit' : ' min');
+  $('offSub').textContent = (S.lang === 'bm' ? 'Kedai berjalan selama ' : 'The kedai ran for ') + label + '.';
+  $('offlineModal').classList.add('show');
+}
+
+function claimOffline() {
+  if (!pendingOffline) return;
+  S.money = add(S.money, pendingOffline.gain);
+  S.lifetime = add(S.lifetime, pendingOffline.gain);
+  toast('+' + fmtRM(pendingOffline.gain));
+  pendingOffline = null;
+  $('offlineModal').classList.remove('show');
+  render(); save();
+}
+
+/* ---------------- store ---------------- */
+const STORE = [
+  { id: 'pack_s', icon: '\ud83e\udded', en: 'Small Bean Pack',  bm: 'Pek Biji Kecil',  price: 'RM 5',  beans: 25 },
+  { id: 'pack_m', icon: '\ud83e\uded8', en: 'Medium Bean Pack', bm: 'Pek Biji Sederhana', price: 'RM 12', beans: 75 },
+  { id: 'pack_l', icon: '\ud83e\uded9', en: 'Large Bean Pack',  bm: 'Pek Biji Besar',  price: 'RM 30', beans: 250 },
+  { id: 'pack_xl', icon: '\ud83c\udf92', en: 'Sack of Beans',   bm: 'Guni Biji',       price: 'RM 60', beans: 700 },
+];
+
+function adsLeft() {
+  const today = new Date().toISOString().slice(0, 10);
+  if (S.adsDate !== today) { S.adsDate = today; S.adsToday = 0; }
+  return Math.max(0, 10 - S.adsToday);
+}
+
+function renderStore() {
+  lastStoreSig = storeSig();
+  adsLeft();
+  $('storeItems').innerHTML = STORE.map(function (p) {
+    return '<div class="buff">' +
+      '<div class="icon">' + p.icon + '</div>' +
+      '<div class="bn">' + (S.lang === 'bm' ? p.bm : p.en) + '</div>' +
+      '<div class="bd">+' + p.beans + ' Biji Kopi · permanent currency</div>' +
+      '<div class="bc"><span class="cost">' + p.price + '</span>' +
+      '<button data-pack="' + p.id + '">' + (S.lang === 'bm' ? 'BELI' : 'BUY') + '</button></div>' +
+    '</div>';
+  }).join('');
+
+  $('adLeft').textContent = adsLeft();
+  const active = boostActive();
+  if (active) {
+    const mins = Math.max(0, Math.round((S.boostUntil - Date.now()) / 60000));
+    $('boostState').innerHTML = '<span>2×</span> ' + mins + (S.lang === 'bm' ? ' minit lagi' : ' min left');
+  } else {
+    $('boostState').textContent = S.lang === 'bm' ? 'Tiada boost aktif' : 'No active boost';
+  }
+  $('watchAdBtn').disabled = adsLeft() <= 0 || adWatching;
+}
+
+let adWatching = false;
+function watchAd() {
+  if (adWatching || adsLeft() <= 0) return;
+  adWatching = true;
+  const btn = $('watchAdBtn');
+  btn.disabled = true;
+  $('watchAdBtn').textContent = S.lang === 'bm' ? 'Menonton...' : 'Watching...';
+  const bar = $('adProgress');
+  let pct = 0;
+  const iv = setInterval(function () {
+    pct += 5;
+    bar.style.width = Math.min(100, pct) + '%';
+    if (pct >= 100) {
+      clearInterval(iv);
+      bar.style.width = '0%';
+      S.adsToday++;
+      S.boostUntil = Date.now() + 2 * 3600 * 1000;
+      adWatching = false;
+      btn.textContent = S.lang === 'bm' ? 'Tonton iklan' : 'Watch ad';
+      toast(S.lang === 'bm' ? '2× selama 2 jam!' : '2x income for 2 hours!');
+      render(); save();
+    }
+  }, 250);
+}
+
+function buyPack(id) {
+  const p = STORE.filter(function (x) { return x.id === id; })[0];
+  if (!p) return;
+  if (!confirm((S.lang === 'bm' ? 'Demo sahaja — tiada bayaran sebenar.\n\nTerima ' : 'Demo only — no real payment is taken.\n\nReceive ') + p.beans + ' Biji Kopi?')) return;
+  S.beans += p.beans;
+  S.purchases.push({ id: id, at: Date.now(), price: p.price });
+  sfxAch();
+  toast('+' + p.beans + ' Biji Kopi');
+  render(); save();
+}
+
 /* ---------------- persistence ---------------- */
 function save() {
   if (hardReset) return;
@@ -589,6 +693,10 @@ function load() {
     S.beans = d.beans | 0;
     S.buffs = d.buffs || {};
     S.goals = d.goals || {};
+    S.boostUntil = d.boostUntil || 0;
+    S.adsToday = d.adsToday | 0;
+    S.adsDate = d.adsDate || '';
+    S.purchases = d.purchases || [];
     S.startedAt = d.startedAt || Date.now();
     S.counts = Object.assign({}, d.counts);
     BUILDINGS.forEach(b => { S.counts[b.id] = S.counts[b.id] | 0; });
@@ -605,10 +713,7 @@ function load() {
     const rate = hasBuff('naga') ? 0.75 : OFFLINE_RATE;
     const capped = Math.min(elapsed, capH * 3600);
     if (capped > 60) {
-      const gain = mul(cps(), fromNum(capped * rate));
-      S.money = add(S.money, gain);
-      S.lifetime = add(S.lifetime, gain);
-      setTimeout(() => toast(t().toastBack(fmtRM(gain))), 500);
+      pendingOffline = { gain: mul(cps(), fromNum(capped * rate)), secs: capped };
     }
     return true;
   } catch (e) { return false; }
@@ -690,6 +795,9 @@ function claimGoal(id) {
   toast('+' + g.reward + ' ' + (S.lang === 'bm' ? 'Biji Kopi' : 'Biji Kopi'));
   render(); save();
 }
+
+let lastStoreSig = '';
+function storeSig() { return S.lang + '|' + adsLeft() + '|' + (boostActive() ? Math.round(S.boostUntil / 60000) : 0); }
 
 let buffSig = '';
 function buffSignature() {
@@ -908,12 +1016,15 @@ function render() {
   updateRing();
   $('cps').textContent = fmt(cps());
   $('clickGain').textContent = '+ ' + fmtRM(clickPower());
+  const bc = $('brewCount');
+  if (bc) bc.textContent = S.clicks.toLocaleString('en-MY') + (S.lang === 'bm' ? ' bancuhan' : ' brews');
   renderShop();
   renderPrestige();
   renderNotices();
   updateAchBadge();
   if ($('panel-achievements').classList.contains('active') && achSignature() !== achSig) renderAch();
   if ($('panel-buffs').classList.contains('active') && buffSignature() !== buffSig) renderBuffs();
+  if ($('panel-shop').classList.contains('active') && storeSig() !== lastStoreSig) renderStore();
   if ($('panel-stats').classList.contains('active')) renderStats();
 }
 
@@ -980,6 +1091,7 @@ function loop(now) {
   saveTimer += dt;
   if (saveTimer > 5) { saveTimer = 0; save(); checkAchievements(); }
   render();
+  if (pendingOffline) setTimeout(showOffline, 600);
   requestAnimationFrame(loop);
 }
 
@@ -1007,6 +1119,7 @@ function init() {
     if (btn.dataset.tab === 'achievements') renderAch();
     if (btn.dataset.tab === 'stats') renderStats();
     if (btn.dataset.tab === 'buffs') renderBuffs();
+    if (btn.dataset.tab === 'shop') renderStore();
     sfxTap();
   });
 
@@ -1095,6 +1208,13 @@ function init() {
   }
   $('soundBtn').addEventListener('click', toggleSound);
   $('soundToggle').addEventListener('click', toggleSound);
+
+  $('claimOffline').addEventListener('click', claimOffline);
+  $('watchAdBtn').addEventListener('click', watchAd);
+  $('storeItems').addEventListener('click', function (e) {
+    const btn = e.target.closest('button[data-pack]');
+    if (btn) buyPack(btn.dataset.pack);
+  });
 
   $('beanHelp').addEventListener('click', function (e) {
     e.stopPropagation();
@@ -1223,6 +1343,7 @@ function init() {
   if (!hadSave) setTimeout(function () { toast(t().toastWelcome); }, 700);
 
   render();
+  if (pendingOffline) setTimeout(showOffline, 600);
   requestAnimationFrame(loop);
 }
 
