@@ -59,7 +59,7 @@ const COST_MULT = 1.15;
 const CLICK_BASE = 0.05;
 const OFFLINE_CAP_HOURS = 8;
 const OFFLINE_RATE = 0.5;
-const P1_UNLOCK = 1e6;
+const P1_UNLOCK = 2.5e5;
 const P2_UNLOCK_TOKENS = 100;
 
 const BUILDINGS = [
@@ -216,7 +216,7 @@ const T = {
     resetTitle: 'Reset everything', resetSub: 'Wipes all progress including prestige layers.',
     save: 'Save', export: 'Export', import: 'Import', reset: 'Reset',
     p1: 'Balik Kampung', p2: 'Franchise Expansion',
-    p1Locked: 'Earn RM 1.00M lifetime to unlock.',
+    p1Locked: 'Earn RM 250,000 lifetime to unlock.',
     p2Locked: 'Reach 100 Warung Tokens to unlock.',
     p1Ready: (g) => 'Convert to ' + g + ' Warung Token (+' + (g * 10).toFixed(0) + '% earnings).',
     p2Ready: (g) => 'Spend all Warung Tokens for ' + g + ' Franchise Star (+50% each, forever).',
@@ -248,7 +248,7 @@ const T = {
     resetTitle: 'Set semula semua', resetSub: 'Padam semua kemajuan termasuk lapisan prestij.',
     save: 'Simpan', export: 'Eksport', import: 'Import', reset: 'Set Semula',
     p1: 'Balik Kampung', p2: 'Buka Francais',
-    p1Locked: 'Kumpul RM 1.00J seumur hidup untuk buka.',
+    p1Locked: 'Kumpul RM 250,000 seumur hidup untuk buka.',
     p2Locked: 'Dapatkan 100 Warung Token untuk buka.',
     p1Ready: (g) => 'Tukar kepada ' + g + ' Warung Token (+' + (g * 10).toFixed(0) + '% pendapatan).',
     p2Ready: (g) => 'Guna semua Warung Token untuk ' + g + ' Bintang Francais (+50% setiap satu, kekal).',
@@ -265,7 +265,7 @@ const T = {
 };
 
 /* ---------------- state ---------------- */
-const VERSION = '2026.11.16-13';
+const VERSION = '2026.11.16-14';
 const SAVE_KEY = 'kopitiam-kosong-v2';
 const OLD_KEY = 'kopitiam-kosong-v1';
 
@@ -342,7 +342,8 @@ function maxAffordable(b) {
 }
 function p1Gain() {
   if (cmp(S.lifetime, fromNum(P1_UNLOCK)) < 0) return 0;
-  const g = Math.floor((S.lifetime.e - 6) * 5 + 1) * (1 + S.bintang * 0.25);
+  const decades = Math.log10(val(S.lifetime) / P1_UNLOCK);
+  const g = Math.floor(decades * 6 + 1) * (1 + S.bintang * 0.25);
   return Math.max(1, Math.floor(g));
 }
 function p2Gain() {
@@ -1064,7 +1065,7 @@ function renderPrestige() {
   const g1 = p1Gain();
   $('prestigeInfo').textContent = g1 > 0 ? t().p1Ready(g1) : t().p1Locked;
   $('prestigeBtn').disabled = g1 <= 0;
-  const ready = g1 > 0 && (S.lifetime.e >= 6.7 || g1 >= S.tokens + 3);
+  const ready = g1 > 0 && (g1 >= S.tokens + 2 || val(S.lifetime) >= P1_UNLOCK * 8);
   $('prestigeBtn').classList.toggle('ready', ready);
   if (ready) $('prestigeInfo').textContent = (S.lang === 'bm' ? '\u2b50 Masa sesuai! ' : '\u2b50 Good time to reset! ') + t().p1Ready(g1);
   $('prestigeBtn').textContent = g1 > 0 ? t().p1Btn + ' (+' + g1 + ')' : t().p1Btn;
