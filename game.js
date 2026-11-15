@@ -63,28 +63,28 @@ const P1_UNLOCK = 1e7;
 const P2_UNLOCK_TOKENS = 100;
 
 const BUILDINGS = [
-  { id: 'cerek',    name: 'Cerek Air Panas',     base: 0.25,    cps: 0.02,
+  { id: 'cerek',    name: 'Cerek Air Panas',     nameEn: 'Kettle',           base: 0.25,    cps: 0.02,
     en: 'Old aluminium kettle. Where every kopi begins.',
     bm: 'Cerek aluminium lama. Di sinilah setiap kopi bermula.' },
-  { id: 'tapis',    name: 'Tapis Kopi',          base: 1.5,     cps: 0.15,
+  { id: 'tapis',    name: 'Tapis Kopi',          nameEn: 'Cloth Filter',     base: 1.5,     cps: 0.15,
     en: 'Cloth filter. Makes the kopi thicker and stronger.',
     bm: 'Kain tapis. Buat kopi lebih kaw dan pekat.' },
-  { id: 'mesin',    name: 'Mesin Kopi Lama',     base: 18,      cps: 1.2,
+  { id: 'mesin',    name: 'Mesin Kopi Lama',     nameEn: 'Coffee Machine',   base: 18,      cps: 1.2,
     en: 'Loud motor, still great coffee.',
     bm: 'Motor bising, kopi tetap sedap.' },
-  { id: 'roti',     name: 'Dapur Roti Canai',    base: 220,     cps: 8,
+  { id: 'roti',     name: 'Dapur Roti Canai',    nameEn: 'Roti Canai Griddle', base: 220,   cps: 8,
     en: 'The morning crowd magnet.',
     bm: 'Tarikan utama setiap pagi.' },
-  { id: 'tetap',    name: 'Pelanggan Tetap',     base: 2600,    cps: 55,
+  { id: 'tetap',    name: 'Pelanggan Tetap',     nameEn: 'Loyal Regulars',   base: 2600,    cps: 55,
     en: 'They come even in heavy rain.',
     bm: 'Mereka datang walaupun hujan lebat.' },
-  { id: 'rider',    name: 'Rider Penghantaran',  base: 32000,   cps: 400,
+  { id: 'rider',    name: 'Rider Penghantaran',  nameEn: 'Delivery Rider',   base: 32000,   cps: 400,
     en: 'Coffee to the office in 30 minutes.',
     bm: 'Kopi sampai ke ofis dalam 30 minit.' },
-  { id: 'cawangan', name: 'Cawangan Warung',     base: 450000,  cps: 3200,
+  { id: 'cawangan', name: 'Cawangan Warung',     nameEn: 'Branch Outlet',    base: 450000,  cps: 3200,
     en: 'Another shop at the end of the road.',
     bm: 'Satu lagi kedai di hujung jalan.' },
-  { id: 'francais', name: 'Francais Kebangsaan', base: 7.5e6,   cps: 26000,
+  { id: 'francais', name: 'Francais Kebangsaan', nameEn: 'National Franchise', base: 7.5e6, cps: 26000,
     en: 'Your kopitiam in every state.',
     bm: 'Kopitiam anda di setiap negeri.' },
 ];
@@ -100,7 +100,7 @@ const ACHIEVEMENTS = [
   { id: 'b_roti',      en: 'Roti Canai Griddle',   bm: 'Dapur Roti Canai',      ok: s => s.counts.roti >= 1,   p: s => [s.counts.roti, 1] },
   { id: 'b_tetap',     en: 'Loyal Regulars',       bm: 'Pelanggan Tetap',       ok: s => s.counts.tetap >= 1,  p: s => [s.counts.tetap, 1] },
   { id: 'b_rider',     en: 'Delivery Rider',       bm: 'Rider Penghantaran',    ok: s => s.counts.rider >= 1,  p: s => [s.counts.rider, 1] },
-  { id: 'b_cawangan',  en: 'Second Outlet',        bm: 'Cawangan Kedua',        ok: s => s.counts.cawangan >= 1, p: s => [s.counts.cawangan, 1] },
+  { id: 'b_cawangan',  en: 'Branch Outlet',        bm: 'Cawangan Kedua',        ok: s => s.counts.cawangan >= 1, p: s => [s.counts.cawangan, 1] },
   { id: 'b_francais',  en: 'National Franchise',   bm: 'Francais Kebangsaan',   ok: s => s.counts.francais >= 1, p: s => [s.counts.francais, 1] },
   { id: 'earn_1k',     en: 'RM 1,000 Earned',      bm: 'RM 1,000 Diperoleh',    ok: s => s.lifetime.e >= 3,  p: s => [Math.min(val(s.lifetime), 1000), 1000] },
   { id: 'earn_1m',     en: 'RM 1,000,000',         bm: 'RM 1 Juta',             ok: s => s.lifetime.e >= 6,  p: s => [Math.min(val(s.lifetime), 1000000), 1000000] },
@@ -395,7 +395,7 @@ function buildShop() {
     el.id = 'item-' + b.id;
     el.innerHTML =
       '<div>' +
-        '<div class="name">' + b.name + '</div>' +
+        '<div class="name">' + (S.lang === 'bm' ? b.name : b.nameEn) + '</div>' +
         '<div class="sub" id="sub-' + b.id + '">' + (S.lang === 'bm' ? b.bm : b.en) + '</div>' +
         '<div class="cost" id="cost-' + b.id + '">—</div>' +
       '</div>' +
