@@ -59,7 +59,7 @@ const COST_MULT = 1.15;
 const CLICK_BASE = 0.05;
 const OFFLINE_CAP_HOURS = 8;
 const OFFLINE_RATE = 0.5;
-const P1_UNLOCK = 1.5e5;
+const P1_UNLOCK = 1.2e5;
 const P2_UNLOCK_TOKENS = 100;
 
 const BUILDINGS = [
@@ -216,7 +216,7 @@ const T = {
     resetTitle: 'Reset everything', resetSub: 'Wipes all progress including prestige layers.',
     save: 'Save', export: 'Export', import: 'Import', reset: 'Reset',
     p1: 'Balik Kampung', p2: 'Franchise Expansion',
-    p1Locked: 'Earn RM 150,000 lifetime to unlock.',
+    p1Locked: 'Earn RM 120,000 lifetime to unlock.',
     p2Locked: 'Reach 100 Warung Tokens to unlock.',
     p1Ready: (g) => 'Convert to ' + g + ' Warung Token (+' + (g * 10).toFixed(0) + '% earnings).',
     p2Ready: (g) => 'Spend all Warung Tokens for ' + g + ' Franchise Star (+50% each, forever).',
@@ -248,7 +248,7 @@ const T = {
     resetTitle: 'Set semula semua', resetSub: 'Padam semua kemajuan termasuk lapisan prestij.',
     save: 'Simpan', export: 'Eksport', import: 'Import', reset: 'Set Semula',
     p1: 'Balik Kampung', p2: 'Buka Francais',
-    p1Locked: 'Kumpul RM 150,000 seumur hidup untuk buka.',
+    p1Locked: 'Kumpul RM 120,000 seumur hidup untuk buka.',
     p2Locked: 'Dapatkan 100 Warung Token untuk buka.',
     p1Ready: (g) => 'Tukar kepada ' + g + ' Warung Token (+' + (g * 10).toFixed(0) + '% pendapatan).',
     p2Ready: (g) => 'Guna semua Warung Token untuk ' + g + ' Bintang Francais (+50% setiap satu, kekal).',
@@ -265,7 +265,7 @@ const T = {
 };
 
 /* ---------------- state ---------------- */
-const VERSION = '2026.11.16-15';
+const VERSION = '2026.11.16-16';
 const SAVE_KEY = 'kopitiam-kosong-v2';
 const OLD_KEY = 'kopitiam-kosong-v1';
 
