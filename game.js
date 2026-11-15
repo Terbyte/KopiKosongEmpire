@@ -243,7 +243,7 @@ const T = {
 };
 
 /* ---------------- state ---------------- */
-const VERSION = '2026.11.16-6';
+const VERSION = '2026.11.16-7';
 const SAVE_KEY = 'kopitiam-kosong-v2';
 const OLD_KEY = 'kopitiam-kosong-v1';
 
@@ -1259,6 +1259,13 @@ function init() {
   $('goalList').addEventListener('click', function (e) {
     const btn = e.target.closest('button[data-goal]');
     if (btn) claimGoal(btn.dataset.goal);
+  });
+
+  $('updateBtn').addEventListener('click', function () {
+    save();
+    const u = new URL(location.href);
+    u.searchParams.set('u', Date.now().toString());
+    location.replace(u.toString());
   });
 
   $('saveBtn').addEventListener('click', function () { save(); toast(t().toastSave); });
