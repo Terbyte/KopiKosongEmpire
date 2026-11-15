@@ -83,10 +83,12 @@ const BUILDINGS = [
     bm: 'Kopi sampai ke ofis dalam 30 minit.' },
   { id: 'cawangan', name: 'Cawangan Warung',     nameEn: 'Branch Outlet',    base: 450000,  cps: 5200,
     en: 'Another shop at the end of the road.',
-    bm: 'Satu lagi kedai di hujung jalan.' },
+    bm: 'Satu lagi kedai di hujung jalan.',
+    reqPrestige: 1, req: s => s.prestiges >= 1 },
   { id: 'francais', name: 'Francais Kebangsaan', nameEn: 'National Franchise', base: 7.5e6, cps: 26000,
     en: 'Your kopitiam in every state.',
-    bm: 'Kopitiam anda di setiap negeri.' },
+    bm: 'Kopitiam anda di setiap negeri.',
+    reqPrestige: 3, req: s => s.prestiges >= 3 },
 ];
 
 const ACHIEVEMENTS = [
@@ -268,7 +270,7 @@ const T = {
 };
 
 /* ---------------- state ---------------- */
-const VERSION = '2026.11.16-18';
+const VERSION = '2026.11.16-19';
 const SAVE_KEY = 'kopitiam-kosong-v2';
 const OLD_KEY = 'kopitiam-kosong-v1';
 
@@ -524,6 +526,7 @@ function brew(ev) {
 }
 
 function buy(b, n) {
+  if (b.req && !b.req(S)) return;
   if (n === 'max') n = maxAffordable(b);
   if (!n || n <= 0) return;
   const cost = costFor(b, S.counts[b.id] || 0, n);
@@ -800,9 +803,19 @@ function renderShop() {
       const unit = costFor(b, owned, 1);
       $('cost-' + b.id).textContent = fmtRM(unit) + ' each · ' + fmtRM(cost) + ' for ' + amount.toLocaleString('en-MY');
     }
-    el.classList.toggle('afford', afford);
+    const reqOk = !b.req || b.req(S);
+    el.classList.toggle('afford', afford && reqOk);
     el.classList.toggle('locked', i > 0 && owned === 0 && !gte(S.money, fromNum(b.base * 0.2)));
-    el.querySelector('.buybtn').disabled = !afford;
+    el.classList.toggle('needsPrestige', !reqOk);
+    const btn = el.querySelector('.buybtn');
+    btn.disabled = !afford || !reqOk;
+    if (!reqOk) {
+      $('cost-' + b.id).textContent = (S.lang === 'bm' ? 'Perlu ' : 'Requires ') +
+        b.reqPrestige + '× Balik Kampung';
+      btn.textContent = S.lang === 'bm' ? 'TERKUNCI' : 'LOCKED';
+    } else {
+      btn.textContent = t().buy;
+    }
   });
 }
 

@@ -1136,3 +1136,7 @@ footer {
 }
 .goal.locked { opacity: .45; border-style: dashed; }
 .goal.locked button { background: #2a1a10; color: #8a7050; }
+
+.item.needsPrestige { opacity: .62; border-color: rgba(240,180,41,.25); }
+.item.needsPrestige .cost { color: var(--kuning); font-size: 11.5px; }
+.item.needsPrestige .buybtn { background: #2a1a10; color: #9a7c52; border: 1px dashed rgba(240,180,41,.35); }

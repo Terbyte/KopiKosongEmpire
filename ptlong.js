@@ -82,6 +82,17 @@ const MAX_CYCLES = 40;
     const offAmount = hadModal ? (await p.textContent('#offAmount')).trim() : 'none';
     if (hadModal) { await p.click('#claimOffline'); await p.waitForTimeout(400); }
 
+    // a real player prestiges whenever it is available
+    const canPrestige = await p.evaluate(() => {
+      const btn = document.querySelector('#prestigeBtn');
+      return btn && !btn.disabled;
+    });
+    if (canPrestige) {
+      await p.click('#prestigeBtn');
+      await p.waitForTimeout(700);
+      await buyBest();
+    }
+
     await buyBest();
     await claimMissions();
 
@@ -93,7 +104,7 @@ const MAX_CYCLES = 40;
     cycleLog.push({
       cycle, hours_played: '~1min + ' + cycle + 'h offline',
       off_claim: offAmount, cash_after_claim: (await p.textContent('#money')).trim(),
-      cps, francais, buildings: after.counts,
+      cps, francais, buildings: after.counts, prestiges: after.prestiges || 0,
       life_e: after.lifetime ? after.lifetime.e : null
     });
 
