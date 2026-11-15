@@ -100,17 +100,6 @@ const ACHIEVEMENTS = [
   { id: 'click_5000', grp: 'brew',  en: '5,000 Brews',          bm: '5,000 Bancuhan',        w: 0.25, ok: s => s.clicks >= 5000,   p: s => [s.clicks, 5000] },
   { id: 'click_10000', grp: 'brew', en: '10,000 Brews',         bm: '10,000 Bancuhan',       w: 0.25, ok: s => s.clicks >= 10000,  p: s => [s.clicks, 10000] },
 
-  // ---- equipment ----
-  { id: 'b_cerek',     en: 'First Kettle',         bm: 'Cerek Pertama',         w: 1,    ok: s => s.counts.cerek >= 1,  p: s => [s.counts.cerek, 1] },
-  { id: 'b_cerek_50',  en: '50 Kettles',           bm: '50 Cerek',              w: 0.5,  ok: s => s.counts.cerek >= 50, p: s => [s.counts.cerek, 50] },
-  { id: 'b_tapis',     en: 'Cloth Filter',         bm: 'Tapis Kopi',            w: 1,    ok: s => s.counts.tapis >= 1,  p: s => [s.counts.tapis, 1] },
-  { id: 'b_mesin',     en: 'Coffee Machine',       bm: 'Mesin Kopi',            w: 1,    ok: s => s.counts.mesin >= 1,  p: s => [s.counts.mesin, 1] },
-  { id: 'b_roti',      en: 'Roti Canai Griddle',   bm: 'Dapur Roti Canai',      w: 1,    ok: s => s.counts.roti >= 1,   p: s => [s.counts.roti, 1] },
-  { id: 'b_tetap',     en: 'Loyal Regulars',       bm: 'Pelanggan Tetap',       w: 1,    ok: s => s.counts.tetap >= 1,  p: s => [s.counts.tetap, 1] },
-  { id: 'b_rider',     en: 'Delivery Rider',       bm: 'Rider Penghantaran',    w: 1,    ok: s => s.counts.rider >= 1,  p: s => [s.counts.rider, 1] },
-  { id: 'b_cawangan',  en: 'Branch Outlet',        bm: 'Cawangan Kedua',        w: 0.5,  ok: s => s.counts.cawangan >= 1, p: s => [s.counts.cawangan, 1] },
-  { id: 'b_francais',  en: 'National Franchise',   bm: 'Francais Kebangsaan',   w: 0.5,  ok: s => s.counts.francais >= 1, p: s => [s.counts.francais, 1] },
-
   // ---- money & prestige ----
   { id: 'earn_1k',     en: 'RM 1,000 Earned',      bm: 'RM 1,000 Diperoleh',    w: 0.5,  ok: s => s.lifetime.e >= 3,  p: s => [Math.min(val(s.lifetime), 1000), 1000] },
   { id: 'earn_1m',     en: 'RM 1,000,000',         bm: 'RM 1 Juta',             w: 0.5,  ok: s => s.lifetime.e >= 6,  p: s => [Math.min(val(s.lifetime), 1000000), 1000000] },
@@ -121,6 +110,33 @@ const ACHIEVEMENTS = [
   { id: 'star_1',      en: 'First Franchise Star', bm: 'Bintang Francais',      w: 0.25, ok: s => s.bintang >= 1,     p: s => [s.bintang, 1] },
 ];
 
+/* ---- equipment tier ladders (kept short on purpose) ---- */
+const EQ_TIERS = [
+  ['cerek',    'Cerek',       'Kettle',            [1, 50, 250], [1, 0.5, 0.25]],
+  ['tapis',    'Tapis',       'Cloth Filter',      [1, 25, 100], [1, 0.5, 0.25]],
+  ['mesin',    'Mesin',       'Coffee Machine',    [1, 15, 50],  [1, 0.5, 0.25]],
+  ['roti',     'Dapur Roti',  'Roti Canai Griddle',[1, 10, 40],  [1, 0.5, 0.25]],
+  ['tetap',    'Pelanggan',   'Loyal Regulars',    [1, 10, 30],  [1, 0.5, 0.25]],
+  ['rider',    'Rider',       'Delivery Rider',    [1, 10, 25],  [1, 0.5, 0.25]],
+  ['cawangan', 'Cawangan',    'Branch Outlet',     [1, 5, 15],   [0.5, 0.25, 0.25]],
+  ['francais', 'Francais',    'National Franchise',[1, 5, 10],   [0.5, 0.25, 0.25]],
+];
+
+EQ_TIERS.forEach(function (row) {
+  const id = row[0], bmName = row[1], enName = row[2], tiers = row[3], weights = row[4];
+  tiers.forEach(function (n, i) {
+    ACHIEVEMENTS.push({
+      id: 'b_' + id + '_' + n,
+      grp: id,
+      en: enName + ' \u00d7' + n,
+      bm: bmName + ' \u00d7' + n,
+      w: weights[i],
+      ok: function (s) { return (s.counts[id] || 0) >= n; },
+      p: function (s) { return [s.counts[id] || 0, n]; }
+    });
+  });
+});
+
 /* ---------------- i18n ---------------- */
 const T = {
   en: {
@@ -128,7 +144,7 @@ const T = {
     rateUnit: 'RM / sec', brew: 'BREW KOPI', notice: 'Notice Board',
     shop: 'Equipment & Outlets', buy: 'BUY',
     tabShop: 'Shop', tabAch: 'Achievements', tabStats: 'Stats', tabSet: 'Settings',
-    achTitle: 'Achievements', achSub: 'Each achievement gives a permanent +1% to all earnings.',
+    achTitle: 'Achievements', achSub: 'Every tier gives a permanent earnings bonus. Harder tiers give less.',
     achDone: 'Unlocked', achNot: 'Locked',
     statsTitle: 'Statistics',
     sMoney: 'Cash on hand', sRate: 'Income', sLifetime: 'Earned this run',
@@ -160,7 +176,7 @@ const T = {
     rateUnit: 'RM / saat', brew: 'BANCUH KOPI', notice: 'Papan Notis',
     shop: 'Peralatan & Kedai', buy: 'BELI',
     tabShop: 'Kedai', tabAch: 'Pencapaian', tabStats: 'Statistik', tabSet: 'Tetapan',
-    achTitle: 'Pencapaian', achSub: 'Setiap pencapaian memberi +1% kekal kepada semua pendapatan.',
+    achTitle: 'Pencapaian', achSub: 'Setiap tier memberi bonus pendapatan kekal. Tier lebih susah beri lebih sedikit.',
     achDone: 'Dibuka', achNot: 'Belum',
     statsTitle: 'Statistik',
     sMoney: 'Tunai di tangan', sRate: 'Pendapatan', sLifetime: 'Diperoleh pusingan ini',
@@ -190,7 +206,7 @@ const T = {
 };
 
 /* ---------------- state ---------------- */
-const VERSION = '2026.11.15-11';
+const VERSION = '2026.11.15-12';
 const SAVE_KEY = 'kopitiam-kosong-v2';
 const OLD_KEY = 'kopitiam-kosong-v1';
 
@@ -580,7 +596,12 @@ function renderShop() {
     const el = $('item-' + b.id);
     if (!el) return;
     $('own-' + b.id).textContent = owned.toLocaleString('en-MY');
-    $('cost-' + b.id).textContent = fmtRM(cost) + (buyAmount === 'max' ? ' · MAX' : '');
+    if (buyAmount === 1) {
+      $('cost-' + b.id).textContent = fmtRM(cost);
+    } else {
+      const unit = costFor(b, owned, 1);
+      $('cost-' + b.id).textContent = fmtRM(unit) + ' each · ' + fmtRM(cost) + ' for ' + amount.toLocaleString('en-MY');
+    }
     el.classList.toggle('afford', afford);
     el.classList.toggle('locked', i > 0 && owned === 0 && !gte(S.money, fromNum(b.base * 0.2)));
     el.querySelector('.buybtn').disabled = !afford;
@@ -596,27 +617,44 @@ function updateAchBadge() {
   if (badge) badge.textContent = achCount() + '/' + ACHIEVEMENTS.length;
 }
 
+function ladderInfo(grp) {
+  const list = ACHIEVEMENTS.filter(function (a) { return a.grp === grp; });
+  const done = list.filter(function (a) { return S.ach[a.id]; }).length;
+  const next = list.filter(function (a) { return !S.ach[a.id]; })[0];
+  return { list: list, done: done, next: next };
+}
+
+function ladderTitle(grp) {
+  if (grp === 'brew') return S.lang === 'bm' ? 'Larian Bancuhan' : 'Brew Ladder';
+  const row = EQ_TIERS.filter(function (r) { return r[0] === grp; })[0];
+  if (!row) return grp;
+  return row[2];
+}
+
+function ladderLine(grp, compact) {
+  const info = ladderInfo(grp);
+  const next = info.next;
+  const pr = next ? next.p(S) : [1, 1];
+  const pct = next ? Math.min(100, (pr[0] / Math.max(pr[1], 1)) * 100) : 100;
+  const fmtn = function (x) { return x >= 10000 ? fmt(fromNum(x)) : Math.round(x).toLocaleString('en-MY'); };
+  const sub = next
+    ? (S.lang === 'bm' ? 'Seterusnya: ' : 'Next: ') + (S.lang === 'bm' ? next.bm : next.en)
+    : (S.lang === 'bm' ? 'Selesai' : 'Complete');
+  return '<div class="ach ladder ' + (next ? '' : 'done') + '">' +
+    '<div class="t">' + ladderTitle(grp) + '</div>' +
+    '<div class="d">' + sub + '</div>' +
+    '<div class="nbar"><i style="width:' + pct.toFixed(1) + '%"></i></div>' +
+    '<div class="st">' + fmtn(pr[0]) + ' / ' + fmtn(pr[1]) + ' · ' + info.done + '/' + info.list.length +
+      ' ' + (S.lang === 'bm' ? 'dibuka' : 'unlocked') + '</div>' +
+  '</div>';
+}
+
 function renderAch() {
   achSig = achSignature();
-  const brew = ACHIEVEMENTS.filter(function (a) { return a.grp === 'brew'; });
-  const rest = ACHIEVEMENTS.filter(function (a) { return a.grp !== 'brew'; });
-  const bDone = brew.filter(function (a) { return S.ach[a.id]; }).length;
-  const next = brew.filter(function (a) { return !S.ach[a.id]; })[0];
-  const pr = next ? next.p(S) : [brew.length, brew.length];
-  const pct = next ? Math.min(100, (pr[0] / Math.max(pr[1], 1)) * 100) : 100;
-  const label = next ? (S.lang === 'bm' ? next.bm : next.en) : (S.lang === 'bm' ? 'Semua tier selesai' : 'All tiers complete');
+  const groups = ['brew'].concat(EQ_TIERS.map(function (r) { return r[0]; }));
+  const ladders = groups.map(function (g) { return ladderLine(g, false); }).join('');
 
-  const ladder =
-    '<div class="ach ladder ' + (next ? '' : 'done') + '">' +
-      '<div class="t">' + (S.lang === 'bm' ? 'Larian Bancuhan' : 'Brew Ladder') +
-        '<span class="tier">TIER ' + bDone + ' / ' + brew.length + '</span></div>' +
-      '<div class="d">' + (next ? (S.lang === 'bm' ? 'Seterusnya: ' : 'Next: ') + label : label) + '</div>' +
-      '<div class="nbar"><i style="width:' + pct.toFixed(1) + '%"></i></div>' +
-      '<div class="st">' + Math.round(pr[0]).toLocaleString('en-MY') + ' / ' + Math.round(pr[1]).toLocaleString('en-MY') +
-        ' · ' + bDone + ' ' + (S.lang === 'bm' ? 'dibuka' : 'unlocked') + '</div>' +
-    '</div>';
-
-  const cards = rest.map(function (a) {
+  const singles = ACHIEVEMENTS.filter(function (a) { return !a.grp; }).map(function (a) {
     const done = !!S.ach[a.id];
     return '<div class="ach ' + (done ? 'done' : '') + '">' +
       '<div class="t">' + (S.lang === 'bm' ? a.bm : a.en) + '</div>' +
@@ -625,7 +663,7 @@ function renderAch() {
     '</div>';
   }).join('');
 
-  $('achList').innerHTML = ladder + cards;
+  $('achList').innerHTML = ladders + singles;
   updateAchBadge();
 }
 
@@ -675,32 +713,31 @@ function renderPrestige() {
 
 function renderNotices() {
   const fmtn = function (x) { return x >= 10000 ? fmt(fromNum(x)) : Math.round(x).toLocaleString('en-MY'); };
-  const rows = [];
+  const cands = [];
 
-  // brew ladder collapses into one line
-  const brew = ACHIEVEMENTS.filter(function (a) { return a.grp === 'brew'; });
-  const bDone = brew.filter(function (a) { return S.ach[a.id]; }).length;
-  const nextB = brew.filter(function (a) { return !S.ach[a.id]; })[0];
-  if (nextB) {
-    const pr = nextB.p(S);
-    rows.push({
-      label: (S.lang === 'bm' ? 'Larian Bancuhan' : 'Brew Ladder') + ' · TIER ' + bDone + '/' + brew.length,
+  const groups = ['brew'].concat(EQ_TIERS.map(function (r) { return r[0]; }));
+  groups.forEach(function (g) {
+    const info = ladderInfo(g);
+    if (!info.next) return;
+    const pr = info.next.p(S);
+    cands.push({
+      label: ladderTitle(g),
       num: fmtn(pr[0]) + ' / ' + fmtn(pr[1]),
       pct: Math.min(100, (pr[0] / Math.max(pr[1], 1)) * 100)
     });
-  }
+  });
 
-  // fill the rest with non-brew achievements
-  const others = ACHIEVEMENTS.filter(function (a) { return a.grp !== 'brew' && !S.ach[a.id]; })
-    .slice(0, 4 - rows.length);
-  others.forEach(function (a) {
+  ACHIEVEMENTS.filter(function (a) { return !a.grp && !S.ach[a.id]; }).forEach(function (a) {
     const pr = a.p ? a.p(S) : [0, 1];
-    rows.push({
-      label: (S.lang === 'bm' ? a.bm : a.en),
+    cands.push({
+      label: S.lang === 'bm' ? a.bm : a.en,
       num: fmtn(pr[0]) + ' / ' + fmtn(pr[1]),
       pct: Math.min(100, (pr[0] / Math.max(pr[1], 0.0001)) * 100)
     });
   });
+
+  cands.sort(function (x, y) { return y.pct - x.pct; });
+  const rows = cands.slice(0, 4);
 
   $('milestones').innerHTML = rows.length
     ? rows.map(function (r) {
