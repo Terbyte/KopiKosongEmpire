@@ -270,7 +270,7 @@ const T = {
 };
 
 /* ---------------- state ---------------- */
-const VERSION = '2026.11.16-23';
+const VERSION = '2026.11.16-24';
 const SAVE_KEY = 'kopitiam-kosong-v2';
 const OLD_KEY = 'kopitiam-kosong-v1';
 
@@ -552,6 +552,7 @@ function doP1() {
   S.lifetime = { m: 0, e: 0 };
   S.clicks = 0;
   BUILDINGS.forEach(b => S.counts[b.id] = 0);
+  lastRingTier = -1;   // ring restarts with the run
   sfxP1(); toast(t().toastP1(g) + ' · +' + Math.max(1, Math.round(g / 2)) + ' 🫘'); checkAchievements(); render(); save();
 }
 
@@ -565,6 +566,7 @@ function doP2() {
   S.lifetime = { m: 0, e: 0 };
   S.clicks = 0;
   BUILDINGS.forEach(b => S.counts[b.id] = 0);
+  lastRingTier = -1;   // ring restarts with the run
   sfxP2(); toast(t().toastP2(g)); checkAchievements(); render(); save();
 }
 
@@ -1353,11 +1355,14 @@ let lastRingTier = -1;
 const RING_C = 2 * Math.PI * 112;   // circumference of r=112
 
 function updateRing() {
+  // the ring tracks THIS RUN's brews, not permanent achievements -
+  // otherwise a prestige resets the counter but leaves the ring at tier 8
   const brew = ACHIEVEMENTS.filter(function (a) { return a.grp === 'brew'; });
-  const done = brew.filter(function (a) { return S.ach[a.id]; }).length;
-  const next = brew.filter(function (a) { return !S.ach[a.id]; })[0];
-  const pr = next ? next.p(S) : [1, 1];
-  const pct = next ? Math.min(1, pr[0] / Math.max(pr[1], 1)) : 1;
+  const targets = brew.map(function (a) { return a.p(S)[1]; });
+  const clicks = S.clicks;
+  const done = targets.filter(function (t) { return clicks >= t; }).length;
+  const next = targets.filter(function (t) { return clicks < t; })[0];
+  const pct = next ? Math.min(1, clicks / Math.max(next, 1)) : 1;
 
   const fill = $('ringFill');
   const btn = $('brewBtn');
