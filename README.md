@@ -94,8 +94,23 @@ carry `en` and `bm` fields. Adding a language = add a key to `T` and a button
 to `#langSeg`.
 
 ### Sound
-Synthesised with `OscillatorNode` — no audio files, no licensing issues.
-Toggle in the header or Settings; the choice is saved.
+Fully synthesised with WebAudio — no audio files, no licensing issues.
+Each action has its own voice:
+
+| Action | Sound |
+|---|---|
+| Brew (click) | water into the cup + ceramic clink |
+| Kettle | metallic tap + steam |
+| Cloth Filter | soft muffled swoosh |
+| Coffee Machine | motor growl + steam burst |
+| Roti Canai Griddle | hot sizzle |
+| Loyal Regulars | two voices chatting |
+| Delivery Rider | scooter horn, two beeps |
+| Branch Outlet | cash register ka-ching |
+| National Franchise | four-note fanfare |
+
+Toggle in the header or Settings; the choice is saved. Audio starts only after
+the first tap (browser autoplay policy).
 
 ## Ideas for later
 

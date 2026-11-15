@@ -235,28 +235,131 @@ function p2Gain() {
 }
 
 /* ---------------- audio ---------------- */
-let AC = null;
+let AC = null, MASTER = null, NOISE = null;
+
 function audio() {
-  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { AC = null; } }
+  if (!AC) {
+    try {
+      AC = new (window.AudioContext || window.webkitAudioContext)();
+      MASTER = AC.createGain();
+      MASTER.gain.value = 0.75;
+      MASTER.connect(AC.destination);
+    } catch (e) { AC = null; }
+  }
+  if (AC && AC.state === 'suspended') { try { AC.resume(); } catch (e) {} }
   return AC;
 }
-function blip(freq, dur, type, gain) {
+
+function noiseBuffer() {
+  if (!NOISE && AC) {
+    const len = Math.floor(AC.sampleRate * 1.2);
+    const buf = AC.createBuffer(1, len, AC.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+    NOISE = buf;
+  }
+  return NOISE;
+}
+
+function tone(o) {
   if (!S.soundOn) return;
   const ac = audio(); if (!ac) return;
-  const o = ac.createOscillator(), g = ac.createGain();
-  o.type = type || 'sine';
-  o.frequency.value = freq;
-  g.gain.setValueAtTime(0.0001, ac.currentTime);
-  g.gain.exponentialRampToValueAtTime(gain || 0.07, ac.currentTime + 0.01);
-  g.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + (dur || 0.12));
-  o.connect(g); g.connect(ac.destination);
-  o.start(); o.stop(ac.currentTime + (dur || 0.12) + 0.02);
+  const t0 = ac.currentTime + (o.delay || 0);
+  const dur = o.dur || 0.15;
+  const osc = ac.createOscillator(), g = ac.createGain();
+  osc.type = o.type || 'sine';
+  osc.frequency.setValueAtTime(o.freq, t0);
+  if (o.slideTo) osc.frequency.exponentialRampToValueAtTime(Math.max(20, o.slideTo), t0 + dur);
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.exponentialRampToValueAtTime(o.gain || 0.05, t0 + (o.attack || 0.008));
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  osc.connect(g); g.connect(MASTER);
+  osc.start(t0); osc.stop(t0 + dur + 0.03);
 }
-const sfxClick = () => blip(520 + Math.random() * 60, 0.09, 'triangle', 0.05);
-const sfxBuy   = () => { blip(523, 0.10, 'sine', 0.07); setTimeout(() => blip(784, 0.14, 'sine', 0.06), 70); };
-const sfxAch   = () => { [659, 880, 1046].forEach((f, i) => setTimeout(() => blip(f, 0.18, 'sine', 0.07), i * 90)); };
-const sfxP1    = () => { [523, 659, 784, 1046].forEach((f, i) => setTimeout(() => blip(f, 0.22, 'sine', 0.08), i * 130)); };
-const sfxP2    = () => { [392, 523, 659, 784, 1046].forEach((f, i) => setTimeout(() => blip(f, 0.26, 'sine', 0.08), i * 110)); };
+
+function hiss(o) {
+  if (!S.soundOn) return;
+  const ac = audio(); if (!ac) return;
+  const buf = noiseBuffer(); if (!buf) return;
+  const t0 = ac.currentTime + (o.delay || 0);
+  const dur = o.dur || 0.2;
+  const src = ac.createBufferSource();
+  src.buffer = buf;
+  const flt = ac.createBiquadFilter();
+  flt.type = o.filter || 'bandpass';
+  flt.frequency.setValueAtTime(o.freq || 1200, t0);
+  if (o.sweepTo) flt.frequency.exponentialRampToValueAtTime(Math.max(40, o.sweepTo), t0 + dur);
+  flt.Q.value = o.q || 1;
+  const g = ac.createGain();
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.exponentialRampToValueAtTime(o.gain || 0.05, t0 + (o.attack || 0.01));
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  src.connect(flt); flt.connect(g); g.connect(MASTER);
+  src.start(t0); src.stop(t0 + dur + 0.02);
+}
+
+/* each purchase gets its own voice */
+const SFX = {
+  // brewing: water into the cup + ceramic clink
+  brew: function () {
+    hiss({ dur: 0.30, filter: 'bandpass', freq: 1500, sweepTo: 420, q: 0.8, gain: 0.055, attack: 0.02 });
+    tone({ freq: 240, slideTo: 150, dur: 0.10, type: 'sine', gain: 0.05, delay: 0.02 });
+    tone({ freq: 1900, dur: 0.05, type: 'triangle', gain: 0.018, delay: 0.05 });
+  },
+  // kettle: metallic tap + short steam
+  cerek: function () {
+    tone({ freq: 1650, slideTo: 900, dur: 0.13, type: 'triangle', gain: 0.055 });
+    tone({ freq: 2350, dur: 0.07, type: 'sine', gain: 0.025, delay: 0.01 });
+    hiss({ dur: 0.22, filter: 'highpass', freq: 3200, gain: 0.02, delay: 0.05 });
+  },
+  // cloth filter: soft cloth swoosh, low and muffled
+  tapis: function () {
+    hiss({ dur: 0.26, filter: 'lowpass', freq: 1400, sweepTo: 520, q: 0.7, gain: 0.06, attack: 0.03 });
+    tone({ freq: 180, dur: 0.09, type: 'sine', gain: 0.02, delay: 0.03 });
+  },
+  // coffee machine: motor growl + steam burst
+  mesin: function () {
+    tone({ freq: 95, slideTo: 70, dur: 0.28, type: 'sawtooth', gain: 0.045 });
+    tone({ freq: 190, slideTo: 140, dur: 0.24, type: 'square', gain: 0.018, delay: 0.02 });
+    hiss({ dur: 0.30, filter: 'highpass', freq: 2600, gain: 0.03, delay: 0.12 });
+  },
+  // roti canai griddle: hot sizzle
+  roti: function () {
+    hiss({ dur: 0.38, filter: 'highpass', freq: 2200, sweepTo: 4200, q: 0.6, gain: 0.045, attack: 0.015 });
+    hiss({ dur: 0.22, filter: 'bandpass', freq: 3400, q: 2, gain: 0.025, delay: 0.10 });
+    tone({ freq: 120, dur: 0.12, type: 'sine', gain: 0.02, delay: 0.02 });
+  },
+  // loyal regulars: two voices chatting
+  tetap: function () {
+    tone({ freq: 430, slideTo: 500, dur: 0.09, type: 'sine', gain: 0.035 });
+    tone({ freq: 560, slideTo: 640, dur: 0.10, type: 'sine', gain: 0.03, delay: 0.11 });
+    tone({ freq: 470, slideTo: 400, dur: 0.08, type: 'sine', gain: 0.022, delay: 0.22 });
+  },
+  // delivery rider: scooter horn, two beeps
+  rider: function () {
+    tone({ freq: 880, dur: 0.09, type: 'square', gain: 0.035 });
+    tone({ freq: 880, dur: 0.09, type: 'square', gain: 0.035, delay: 0.14 });
+    hiss({ dur: 0.3, filter: 'lowpass', freq: 900, gain: 0.02, delay: 0.05 });
+  },
+  // new branch: cash register ka-ching
+  cawangan: function () {
+    tone({ freq: 1200, dur: 0.10, type: 'triangle', gain: 0.045 });
+    tone({ freq: 1750, dur: 0.16, type: 'triangle', gain: 0.04, delay: 0.08 });
+    tone({ freq: 2350, dur: 0.12, type: 'sine', gain: 0.022, delay: 0.14 });
+  },
+  // national franchise: little fanfare
+  francais: function () {
+    [523, 659, 784, 1046].forEach(function (f, i) {
+      tone({ freq: f, dur: 0.24, type: 'triangle', gain: 0.045, delay: i * 0.10 });
+    });
+  },
+};
+
+const sfxFor = function (id) { const f = SFX[id] || SFX.cerek; try { f(); } catch (e) {} };
+const sfxAch  = () => { [659, 880, 1046].forEach((f, i) => setTimeout(() => tone({ freq: f, dur: 0.18, type: 'sine', gain: 0.06 }), i * 90)); };
+const sfxP1   = () => { [523, 659, 784, 1046].forEach((f, i) => setTimeout(() => tone({ freq: f, dur: 0.22, type: 'sine', gain: 0.07 }), i * 130)); };
+const sfxP2   = () => { [392, 523, 659, 784, 1046].forEach((f, i) => setTimeout(() => tone({ freq: f, dur: 0.26, type: 'sine', gain: 0.07 }), i * 110)); };
+const sfxTap  = () => tone({ freq: 700, dur: 0.05, type: 'sine', gain: 0.02 });
 
 /* ---------------- ui utils ---------------- */
 const $ = (id) => document.getElementById(id);
@@ -294,7 +397,7 @@ function brew(ev) {
   S.money = add(S.money, g);
   S.lifetime = add(S.lifetime, g);
   S.clicks++;
-  sfxClick();
+  SFX.brew();
   if (ev) floaty(ev.clientX, ev.clientY, '+' + fmtRM(g));
   checkAchievements();
   render();
@@ -307,7 +410,7 @@ function buy(b, n) {
   if (!gte(S.money, cost)) return;
   S.money = add(S.money, mul(cost, fromNum(-1)));
   S.counts[b.id] = (S.counts[b.id] || 0) + n;
-  sfxBuy();
+  sfxFor(b.id);
   checkAchievements();
   render();
 }
@@ -592,7 +695,7 @@ function init() {
     $('panel-' + btn.dataset.tab).classList.add('active');
     if (btn.dataset.tab === 'achievements') renderAch();
     if (btn.dataset.tab === 'stats') renderStats();
-    sfxClick();
+    sfxTap();
   });
 
   $('prestigeBtn').addEventListener('click', function () {
@@ -618,7 +721,7 @@ function init() {
     $('soundBtn').textContent = S.soundOn ? '🔊' : '🔇';
     $('soundToggle').textContent = S.soundOn ? 'ON' : 'OFF';
     $('soundToggle').classList.toggle('on', S.soundOn);
-    if (S.soundOn) { audio(); sfxBuy(); }
+    if (S.soundOn) { audio(); sfxTap(); }
     save();
   }
   $('soundBtn').addEventListener('click', toggleSound);
