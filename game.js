@@ -199,6 +199,7 @@ let S = {
 BUILDINGS.forEach(b => { S.counts[b.id] = 0; });
 
 let buyAmount = 1;
+let hardReset = false;
 let lastFrame = performance.now();
 let saveTimer = 0;
 const t = () => T[S.lang] || T.en;
@@ -450,6 +451,7 @@ function checkAchievements() {
 
 /* ---------------- persistence ---------------- */
 function save() {
+  if (hardReset) return;
   S.lastSeen = Date.now();
   try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) { /* ignore */ }
 }
@@ -752,9 +754,12 @@ function init() {
   });
 
   $('resetBtn').addEventListener('click', function () {
-    if (!confirm('Delete all progress? This cannot be undone.')) return;
-    localStorage.removeItem(SAVE_KEY);
-    localStorage.removeItem(OLD_KEY);
+    const msg = S.lang === 'bm'
+      ? 'Padam semua kemajuan? Tindakan ini tidak boleh dibatalkan.'
+      : 'Delete all progress? This cannot be undone.';
+    if (!confirm(msg)) return;
+    hardReset = true;
+    try { localStorage.removeItem(SAVE_KEY); localStorage.removeItem(OLD_KEY); } catch (e) {}
     location.reload();
   });
 
@@ -762,7 +767,7 @@ function init() {
   $('soundToggle').textContent = S.soundOn ? 'ON' : 'OFF';
   $('soundToggle').classList.toggle('on', S.soundOn);
 
-  window.addEventListener('beforeunload', save);
+  window.addEventListener('beforeunload', function () { if (!hardReset) save(); });
   document.addEventListener('visibilitychange', function () { if (document.hidden) save(); });
 
   if (!hadSave) setTimeout(function () { toast(t().toastWelcome); }, 700);
