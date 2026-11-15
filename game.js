@@ -190,7 +190,7 @@ const T = {
 };
 
 /* ---------------- state ---------------- */
-const VERSION = '2026.11.15-10';
+const VERSION = '2026.11.15-11';
 const SAVE_KEY = 'kopitiam-kosong-v2';
 const OLD_KEY = 'kopitiam-kosong-v1';
 
@@ -674,16 +674,40 @@ function renderPrestige() {
 }
 
 function renderNotices() {
-  const next = ACHIEVEMENTS.filter(function (a) { return !S.ach[a.id]; }).slice(0, 4);
   const fmtn = function (x) { return x >= 10000 ? fmt(fromNum(x)) : Math.round(x).toLocaleString('en-MY'); };
-  $('milestones').innerHTML = next.length
-    ? next.map(function (a) {
-        const pr = a.p ? a.p(S) : [0, 1];
-        const pct = Math.max(0, Math.min(100, (pr[0] / Math.max(pr[1], 0.0001)) * 100));
+  const rows = [];
+
+  // brew ladder collapses into one line
+  const brew = ACHIEVEMENTS.filter(function (a) { return a.grp === 'brew'; });
+  const bDone = brew.filter(function (a) { return S.ach[a.id]; }).length;
+  const nextB = brew.filter(function (a) { return !S.ach[a.id]; })[0];
+  if (nextB) {
+    const pr = nextB.p(S);
+    rows.push({
+      label: (S.lang === 'bm' ? 'Larian Bancuhan' : 'Brew Ladder') + ' · TIER ' + bDone + '/' + brew.length,
+      num: fmtn(pr[0]) + ' / ' + fmtn(pr[1]),
+      pct: Math.min(100, (pr[0] / Math.max(pr[1], 1)) * 100)
+    });
+  }
+
+  // fill the rest with non-brew achievements
+  const others = ACHIEVEMENTS.filter(function (a) { return a.grp !== 'brew' && !S.ach[a.id]; })
+    .slice(0, 4 - rows.length);
+  others.forEach(function (a) {
+    const pr = a.p ? a.p(S) : [0, 1];
+    rows.push({
+      label: (S.lang === 'bm' ? a.bm : a.en),
+      num: fmtn(pr[0]) + ' / ' + fmtn(pr[1]),
+      pct: Math.min(100, (pr[0] / Math.max(pr[1], 0.0001)) * 100)
+    });
+  });
+
+  $('milestones').innerHTML = rows.length
+    ? rows.map(function (r) {
         return '<li class="notice">' +
-          '<div class="nrow"><span>' + (S.lang === 'bm' ? a.bm : a.en) + '</span>' +
-          '<span class="nnum">' + fmtn(pr[0]) + ' / ' + fmtn(pr[1]) + '</span></div>' +
-          '<div class="nbar"><i style="width:' + pct.toFixed(1) + '%"></i></div>' +
+          '<div class="nrow"><span>' + r.label + '</span>' +
+          '<span class="nnum">' + r.num + '</span></div>' +
+          '<div class="nbar"><i style="width:' + r.pct.toFixed(1) + '%"></i></div>' +
         '</li>';
       }).join('')
     : '<li>' + (S.lang === 'bm' ? 'Semua pencapaian dibuka!' : 'All achievements unlocked!') + '</li>';
