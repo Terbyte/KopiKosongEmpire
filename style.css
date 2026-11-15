@@ -1029,3 +1029,22 @@ footer {
 .offcard h2 { margin: 6px 0 10px; font-size: 15px; letter-spacing: 2px; text-transform: uppercase; color: #e0c79a; }
 .offamount { font-family: monospace; font-size: 30px; color: var(--kuning); text-shadow: 0 0 18px rgba(240,180,41,.5); }
 .offcard .muted { margin: 6px 0 18px; }
+
+/* buff levels */
+.buff .icon { position: relative; }
+.buff .lvl {
+  position: absolute; top: -4px; left: 20px;
+  background: var(--kuning); color: #22140a;
+  font-size: 9.5px; font-weight: 700;
+  border-radius: 7px; padding: 1px 6px;
+  font-family: monospace;
+}
+#prestigeBtn.ready {
+  animation: readyPulse 1.6s ease-in-out infinite;
+  box-shadow: 0 0 0 2px rgba(240,180,41,.5), 0 0 26px rgba(240,180,41,.55);
+}
+@keyframes readyPulse {
+  0%,100% { transform: scale(1); }
+  50%     { transform: scale(1.04); }
+}
+.ach.done { opacity: .45; }

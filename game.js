@@ -140,14 +140,26 @@ EQ_TIERS.forEach(function (row) {
 
 /* ---------------- mystic buffs & goals ---------------- */
 const BUFFS = [
-  { id: 'azimat',  icon: '\ud83e\uddfF', en: 'Bomoh\u2019s Charm',  bm: 'Azimat Bomoh',      cost: 3,  enD: '+50% click value',                        bmD: '+50% nilai klik' },
-  { id: 'toyol',   icon: '\ud83d\udc7a', en: 'Helpful Toyol',      bm: 'Toyol Penolong',    cost: 8,  enD: '+10% income from every outlet',           bmD: '+10% pendapatan semua kedai' },
-  { id: 'jam',     icon: '\u23f3',       en: 'Hourglass of Ages',  bm: 'Jam Pasir Sakti',   cost: 10, enD: '+2 hours offline earnings',               bmD: '+2 jam pendapatan offline' },
-  { id: 'naga',    icon: '\ud83d\udc09', en: 'Coffee Dragon',      bm: 'Naga Kopi',         cost: 12, enD: 'Offline rate 50% \u2192 75%',             bmD: 'Kadar offline 50% \u2192 75%' },
-  { id: 'keris',   icon: '\ud83d\udde1\ufe0f', en: 'Ancient Keris',      bm: 'Keris Tua',         cost: 14, enD: '+25% income',                             bmD: '+25% pendapatan' },
-  { id: 'bunga',   icon: '\ud83c\udf38', en: 'Kantan Flower',      bm: 'Bunga Kantan',      cost: 20, enD: '+20% income',                             bmD: '+20% pendapatan' },
-  { id: 'semangat',icon: '\u2728',       en: 'Shop Spirit',        bm: 'Semangat Kedai',    cost: 25, enD: 'Each click also earns 1% of your income', bmD: 'Setiap klik turut dapat 1% pendapatan' },
+  { id: 'azimat',  icon: '\ud83e\uddfF', en: 'Bomoh\u2019s Charm', bm: 'Azimat Bomoh',
+    baseCost: 3,  enD: '+50% click value per level',        bmD: '+50% nilai klik setiap level' },
+  { id: 'toyol',   icon: '\ud83d\udc7a', en: 'Helpful Toyol',     bm: 'Toyol Penolong',
+    baseCost: 5,  enD: '+10% income per level',             bmD: '+10% pendapatan setiap level' },
+  { id: 'jam',     icon: '\u23f3',       en: 'Hourglass of Ages', bm: 'Jam Pasir Sakti',
+    baseCost: 6,  enD: '+2 hours offline cap per level',    bmD: '+2 jam had offline setiap level' },
+  { id: 'naga',    icon: '\ud83d\udc09', en: 'Coffee Dragon',     bm: 'Naga Kopi',
+    baseCost: 7,  enD: '+25% offline rate per level (max 95%)', bmD: '+25% kadar offline setiap level (maks 95%)' },
+  { id: 'keris',   icon: '\ud83d\udde1\ufe0f', en: 'Ancient Keris',     bm: 'Keris Tua',
+    baseCost: 9,  enD: '+25% income per level',             bmD: '+25% pendapatan setiap level' },
+  { id: 'bunga',   icon: '\ud83c\udf38', en: 'Kantan Flower',     bm: 'Bunga Kantan',
+    baseCost: 12, enD: '+20% income per level',             bmD: '+20% pendapatan setiap level' },
+  { id: 'semangat',icon: '\u2728',       en: 'Shop Spirit',       bm: 'Semangat Kedai',
+    baseCost: 15, enD: '+1% of income added per click, per level', bmD: '+1% pendapatan per klik, setiap level' },
 ];
+
+const BUFF_GROWTH = 1.65;   // cost multiplier per level
+function buffLevel(id) { return S.buffs[id] | 0; }
+function buffCost(b) { return Math.round(b.baseCost * Math.pow(BUFF_GROWTH, buffLevel(b.id))); }
+
 
 const GOALS = [
   { id: 'g_brew100',  en: 'Brew 100 cups',            bm: 'Bancuh 100 cawan',        reward: 2, ok: s => s.clicks >= 100,   p: s => [s.clicks, 100] },
@@ -231,7 +243,7 @@ const T = {
 };
 
 /* ---------------- state ---------------- */
-const VERSION = '2026.11.16-5';
+const VERSION = '2026.11.16-6';
 const SAVE_KEY = 'kopitiam-kosong-v2';
 const OLD_KEY = 'kopitiam-kosong-v1';
 
@@ -246,6 +258,7 @@ let S = {
   beans: 0,
   buffs: {},
   boostUntil: 0,
+  boostMult: 1,
   adsToday: 0,
   adsDate: '',
   purchases: [],
@@ -272,24 +285,19 @@ function achBonus() {
   for (const a of ACHIEVEMENTS) if (S.ach[a.id]) b += (a.w || 1);
   return b;
 }
-function hasBuff(id) { return !!S.buffs[id]; }
 function buffIncomeMult() {
-  let m = 1;
-  if (hasBuff('toyol')) m += 0.10;
-  if (hasBuff('keris')) m += 0.25;
-  if (hasBuff('bunga')) m += 0.20;
-  return m;
+  return 1 + buffLevel('toyol') * 0.10 + buffLevel('keris') * 0.25 + buffLevel('bunga') * 0.20;
 }
-function boostActive() { return S.boostUntil > Date.now(); }
+function boostActive() { return S.boostUntil > Date.now() && (S.boostMult || 1) > 1; }
 function mult() {
   return (1 + S.tokens * 0.1) * (1 + S.bintang * 0.5) * (1 + achBonus() / 100) * buffIncomeMult() *
-         (boostActive() ? 2 : 1);
+         (boostActive() ? (S.boostMult || 1) : 1);
 }
 function clickPower() {
   const tier = 1 + Math.floor(S.clicks / 50);          // +100% base every 50 taps
   let v = (CLICK_BASE * tier + S.clicks * 0.0002) * mult();
-  if (hasBuff('azimat')) v *= 1.5;
-  if (hasBuff('semangat')) v += val(cps()) * 0.01;
+  v *= (1 + buffLevel('azimat') * 0.5);
+  v += val(cps()) * 0.01 * buffLevel('semangat');
   return fromNum(v);
 }
 function cps() {
@@ -503,20 +511,24 @@ function doP1() {
   const g = p1Gain();
   if (g <= 0) return;
   S.tokens += g;
+  S.beans += Math.max(1, Math.round(g / 2));   // prestige feeds the buff economy
   S.prestiges++;
   S.money = { m: 0, e: 0 };
   S.lifetime = { m: 0, e: 0 };
+  S.clicks = 0;
   BUILDINGS.forEach(b => S.counts[b.id] = 0);
-  sfxP1(); toast(t().toastP1(g)); checkAchievements(); render(); save();
+  sfxP1(); toast(t().toastP1(g) + ' · +' + Math.max(1, Math.round(g / 2)) + ' 🫘'); checkAchievements(); render(); save();
 }
 
 function doP2() {
   const g = p2Gain();
   if (g <= 0) return;
   S.bintang += g;
+  S.beans += g * 2;
   S.tokens = 0;
   S.money = { m: 0, e: 0 };
   S.lifetime = { m: 0, e: 0 };
+  S.clicks = 0;
   BUILDINGS.forEach(b => S.counts[b.id] = 0);
   sfxP2(); toast(t().toastP2(g)); checkAchievements(); render(); save();
 }
@@ -628,7 +640,7 @@ function renderStore() {
   const active = boostActive();
   if (active) {
     const mins = Math.max(0, Math.round((S.boostUntil - Date.now()) / 60000));
-    $('boostState').innerHTML = '<span>2×</span> ' + mins + (S.lang === 'bm' ? ' minit lagi' : ' min left');
+    $('boostState').innerHTML = '<span>' + (S.boostMult || 1) + '×</span> ' + mins + (S.lang === 'bm' ? ' minit lagi' : ' min left');
   } else {
     $('boostState').textContent = S.lang === 'bm' ? 'Tiada boost aktif' : 'No active boost';
   }
@@ -651,10 +663,12 @@ function watchAd() {
       clearInterval(iv);
       bar.style.width = '0%';
       S.adsToday++;
+      const m = Math.min(50, 5 * S.adsToday);
+      S.boostMult = m;
       S.boostUntil = Date.now() + 2 * 3600 * 1000;
       adWatching = false;
       btn.textContent = S.lang === 'bm' ? 'Tonton iklan' : 'Watch ad';
-      toast(S.lang === 'bm' ? '2× selama 2 jam!' : '2x income for 2 hours!');
+      toast(S.lang === 'bm' ? m + '× selama 2 jam!' : m + '× income for 2 hours!');
       render(); save();
     }
   }, 250);
@@ -694,6 +708,7 @@ function load() {
     S.buffs = d.buffs || {};
     S.goals = d.goals || {};
     S.boostUntil = d.boostUntil || 0;
+    S.boostMult = d.boostMult || 1;
     S.adsToday = d.adsToday | 0;
     S.adsDate = d.adsDate || '';
     S.purchases = d.purchases || [];
@@ -709,8 +724,8 @@ function load() {
     }
 
     const elapsed = Math.max(0, (Date.now() - (d.lastSeen || Date.now())) / 1000);
-    const capH = OFFLINE_CAP_HOURS + (hasBuff('jam') ? 2 : 0);
-    const rate = hasBuff('naga') ? 0.75 : OFFLINE_RATE;
+    const capH = OFFLINE_CAP_HOURS + buffLevel('jam') * 2;
+    const rate = Math.min(0.95, OFFLINE_RATE + buffLevel('naga') * 0.25);
     const capped = Math.min(elapsed, capH * 3600);
     if (capped > 60) {
       pendingOffline = { gain: mul(cps(), fromNum(capped * rate)), secs: capped };
@@ -778,11 +793,13 @@ function activeGoals() {
 
 function buyBuff(id) {
   const b = BUFFS.filter(function (x) { return x.id === id; })[0];
-  if (!b || S.buffs[id] || S.beans < b.cost) return;
-  S.beans -= b.cost;
-  S.buffs[id] = true;
+  if (!b) return;
+  const cost = buffCost(b);
+  if (S.beans < cost) return;
+  S.beans -= cost;
+  S.buffs[id] = buffLevel(id) + 1;
   sfxAch();
-  toast((S.lang === 'bm' ? 'Berkat diperoleh: ' : 'Blessing gained: ') + (S.lang === 'bm' ? b.bm : b.en));
+  toast((S.lang === 'bm' ? 'Berkat naik ke L' : 'Blessing raised to L') + S.buffs[id]);
   render(); save();
 }
 
@@ -802,7 +819,7 @@ function storeSig() { return S.lang + '|' + adsLeft() + '|' + (boostActive() ? M
 let buffSig = '';
 function buffSignature() {
   const goals = activeGoals().map(function (g) { return g.id + (g.ok(S) ? '1' : '0'); }).join(',');
-  return S.lang + '|' + S.beans + '|' + Object.keys(S.buffs).sort().join(',') + '|' + goals;
+  return S.lang + '|' + S.beans + '|' + JSON.stringify(S.buffs) + '|' + goals;
 }
 
 function renderBuffs() {
@@ -820,16 +837,17 @@ function renderBuffs() {
   if (bb) bb.textContent = S.beans;
 
   $('buffList').innerHTML = BUFFS.map(function (b) {
-    const owned = !!S.buffs[b.id];
-    const afford = S.beans >= b.cost;
-    return '<div class="buff ' + (owned ? 'owned' : '') + '">' +
-      '<div class="icon">' + b.icon + '</div>' +
+    const lvl = buffLevel(b.id);
+    const cost = buffCost(b);
+    const afford = S.beans >= cost;
+    return '<div class="buff ' + (lvl > 0 ? 'owned' : '') + '">' +
+      '<div class="icon">' + b.icon + (lvl > 0 ? '<span class="lvl">L' + lvl + '</span>' : '') + '</div>' +
       '<div class="bn">' + (S.lang === 'bm' ? b.bm : b.en) + '</div>' +
       '<div class="bd">' + (S.lang === 'bm' ? b.bmD : b.enD) + '</div>' +
       '<div class="bc">' +
-        '<span class="cost">' + (owned ? '✓ ' + (S.lang === 'bm' ? 'kekal' : 'permanent') : b.cost + ' biji') + '</span>' +
-        '<button data-buff="' + b.id + '" ' + (owned || !afford ? 'disabled' : '') + '>' +
-          (owned ? (S.lang === 'bm' ? 'DIMILIKI' : 'OWNED') : (S.lang === 'bm' ? 'BELI' : 'BUY')) +
+        '<span class="cost">' + cost + ' biji</span>' +
+        '<button data-buff="' + b.id + '" ' + (afford ? '' : 'disabled') + '>' +
+          (lvl > 0 ? (S.lang === 'bm' ? 'NAIK' : 'LEVEL UP') : (S.lang === 'bm' ? 'BELI' : 'BUY')) +
         '</button>' +
       '</div>' +
     '</div>';
@@ -888,7 +906,9 @@ function renderAch() {
   const groups = ['brew'].concat(EQ_TIERS.map(function (r) { return r[0]; }));
   const ladders = groups.map(function (g) { return ladderLine(g, false); }).join('');
 
-  const singles = ACHIEVEMENTS.filter(function (a) { return !a.grp; }).map(function (a) {
+  const singlesSorted = ACHIEVEMENTS.filter(function (a) { return !a.grp; })
+    .sort(function (x, y) { return (S.ach[x.id] ? 1 : 0) - (S.ach[y.id] ? 1 : 0); });
+  const singles = singlesSorted.map(function (a) {
     const done = !!S.ach[a.id];
     return '<div class="ach ' + (done ? 'done' : '') + '">' +
       '<div class="t">' + (S.lang === 'bm' ? a.bm : a.en) + '</div>' +
@@ -897,7 +917,11 @@ function renderAch() {
     '</div>';
   }).join('');
 
-  $('achList').innerHTML = ladders + singles;
+  const groupsSorted = groups.slice().sort(function (x, y) {
+    return (ladderInfo(x).next ? 0 : 1) - (ladderInfo(y).next ? 0 : 1);
+  });
+  const laddersSorted = groupsSorted.map(function (g) { return ladderLine(g, false); }).join('');
+  $('achList').innerHTML = laddersSorted + singles;
   updateAchBadge();
 }
 
@@ -935,6 +959,9 @@ function renderPrestige() {
     ? t().p1Ready(g1, S.tokens)
     : t().p1Locked + ' (' + t().sTokens + ': ' + S.tokens + ')';
   $('prestigeBtn').disabled = g1 <= 0;
+  const ready = g1 > 0 && (S.lifetime.e >= 6.7 || g1 >= S.tokens + 3);
+  $('prestigeBtn').classList.toggle('ready', ready);
+  if (ready) $('prestigeInfo').textContent = (S.lang === 'bm' ? '\u2b50 Masa sesuai untuk balik kampung! ' : '\u2b50 Good time to reset! ') + t().p1Ready(g1, S.tokens);
   $('prestigeBtn').textContent = g1 > 0 ? t().p1Btn + ' (+' + g1 + ')' : t().p1Btn;
 
   const g2 = p2Gain();
