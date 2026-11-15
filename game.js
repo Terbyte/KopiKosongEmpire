@@ -172,28 +172,31 @@ function buffCost(b) { return Math.round(b.baseCost * Math.pow(BUFF_GROWTH, buff
 
 
 const GOALS = [
-  { id: 'g_brew100',  en: 'Brew 100 cups',            bm: 'Bancuh 100 cawan',        reward: 1, ok: s => s.clicks >= 100,   p: s => [s.clicks, 100] },
-  { id: 'g_rm1k',     en: 'Earn RM 1,000',            bm: 'Peroleh RM 1,000',        reward: 2, ok: s => s.lifetime.e >= 3, p: s => [Math.min(val(s.lifetime), 1000), 1000] },
-  { id: 'g_k10',      en: 'Own 10 kettles',           bm: 'Miliki 10 cerek',         reward: 1, ok: s => s.counts.cerek >= 10, p: s => [s.counts.cerek, 10] },
-  { id: 'g_full',     en: 'Own every building type',  bm: 'Miliki semua jenis kedai',reward: 3, ok: s => BUILDINGS.every(b => s.counts[b.id] >= 1), p: s => [BUILDINGS.filter(b => s.counts[b.id] >= 1).length, BUILDINGS.length] },
-  { id: 'g_brew1k',   en: 'Brew 1,000 cups',          bm: 'Bancuh 1,000 cawan',      reward: 2, ok: s => s.clicks >= 1000,  p: s => [s.clicks, 1000] },
-  { id: 'g_ach10',    en: 'Unlock 10 achievements',   bm: 'Buka 10 pencapaian',      reward: 3, ok: s => achCount() >= 10,  p: s => [achCount(), 10] },
-  { id: 'g_rm100k',   en: 'Earn RM 100,000',          bm: 'Peroleh RM 100,000',      reward: 4, ok: s => s.lifetime.e >= 5, p: s => [Math.min(val(s.lifetime), 100000), 100000] },
-  { id: 'g_k50',      en: 'Own 50 kettles',           bm: 'Miliki 50 cerek',         reward: 4, ok: s => s.counts.cerek >= 50, p: s => [s.counts.cerek, 50] },
-  { id: 'g_tok10',    en: 'Reach 10 Warung Tokens',   bm: 'Capai 10 Warung Token',   reward: 5, ok: s => s.tokens >= 10,   p: s => [s.tokens, 10] },
-  { id: 'g_rm10m',    en: 'Earn RM 10 million',       bm: 'Peroleh RM 10 juta',      reward: 6, ok: s => s.lifetime.e >= 7, p: s => [Math.min(val(s.lifetime), 1e7), 1e7] },
+  // ---- interleaved brew / earn ladders, 1 bean each ----
+  { id: 'g_brew10', en: 'Brew 10 cups', bm: 'Bancuh 10 cawan', reward: 1, ok: s => s.clicks >= 10, p: s => [s.clicks, 10] },
+  { id: 'g_earn10', en: 'Earn RM 10', bm: 'Peroleh RM 10', reward: 1, ok: s => val(s.lifetime) >= 10, p: s => [Math.min(val(s.lifetime),10),10] },
+  { id: 'g_brew100', en: 'Brew 100 cups', bm: 'Bancuh 100 cawan', reward: 1, ok: s => s.clicks >= 100, p: s => [s.clicks, 100] },
+  { id: 'g_earn100', en: 'Earn RM 100', bm: 'Peroleh RM 100', reward: 1, ok: s => val(s.lifetime) >= 100, p: s => [Math.min(val(s.lifetime),100),100] },
+  { id: 'g_brew200', en: 'Brew 200 cups', bm: 'Bancuh 200 cawan', reward: 1, ok: s => s.clicks >= 200, p: s => [s.clicks, 200] },
+  { id: 'g_earn1k', en: 'Earn RM 1,000', bm: 'Peroleh RM 1,000', reward: 1, ok: s => val(s.lifetime) >= 1000, p: s => [Math.min(val(s.lifetime),1000),1000] },
+  { id: 'g_brew300', en: 'Brew 300 cups', bm: 'Bancuh 300 cawan', reward: 1, ok: s => s.clicks >= 300, p: s => [s.clicks, 300] },
+  { id: 'g_earn10k', en: 'Earn RM 10,000', bm: 'Peroleh RM 10,000', reward: 1, ok: s => val(s.lifetime) >= 10000, p: s => [Math.min(val(s.lifetime),10000),10000] },
+  { id: 'g_brew400', en: 'Brew 400 cups', bm: 'Bancuh 400 cawan', reward: 1, ok: s => s.clicks >= 400, p: s => [s.clicks, 400] },
+  { id: 'g_earn100k', en: 'Earn RM 100,000', bm: 'Peroleh RM 100,000', reward: 1, ok: s => val(s.lifetime) >= 100000, p: s => [Math.min(val(s.lifetime),100000),100000] },
 
-  // ---- extended set ----
-  { id: 'g_brew2500', en: 'Brew 2,500 cups',          bm: 'Bancuh 2,500 cawan',      reward: 5, ok: s => s.clicks >= 2500, p: s => [s.clicks, 2500] },
-  { id: 'g_k100',     en: 'Own 100 kettles',          bm: 'Miliki 100 cerek',        reward: 5, ok: s => s.counts.cerek >= 100, p: s => [s.counts.cerek, 100] },
-  { id: 'g_rm1m',     en: 'Earn RM 1 million',        bm: 'Peroleh RM 1 juta',       reward: 6, ok: s => s.lifetime.e >= 6, p: s => [Math.min(val(s.lifetime), 1e6), 1e6] },
-  { id: 'g_ach20',    en: 'Unlock 20 achievements',   bm: 'Buka 20 pencapaian',      reward: 6, ok: s => achCount() >= 20, p: s => [achCount(), 20] },
-  { id: 'g_buff3',    en: 'Reach 3 buff levels',      bm: 'Capai 3 level berkat',    reward: 5, ok: s => buffTotal() >= 3, p: s => [buffTotal(), 3] },
-  { id: 'g_ads5',     en: 'Watch 5 ads',              bm: 'Tonton 5 iklan',          reward: 4, ok: s => (s.adsTotal || 0) >= 5, p: s => [s.adsTotal || 0, 5] },
-  { id: 'g_all5',     en: 'Own 5 of every building',  bm: 'Miliki 5 setiap bangunan', reward: 8, ok: s => BUILDINGS.every(b => s.counts[b.id] >= 5), p: s => [BUILDINGS.filter(b => s.counts[b.id] >= 5).length, BUILDINGS.length] },
-  { id: 'g_brew10k',  en: 'Brew 10,000 cups',         bm: 'Bancuh 10,000 cawan',     reward: 8, ok: s => s.clicks >= 10000, p: s => [s.clicks, 10000] },
-  { id: 'g_tok50',    en: 'Hold 50 Warung Tokens',    bm: 'Pegang 50 Warung Token',  reward: 10, ok: s => s.tokens >= 50, p: s => [s.tokens, 50] },
-  { id: 'g_p5',       en: 'Prestige 5 times',         bm: 'Prestij 5 kali',          reward: 8, ok: s => s.prestiges >= 5, p: s => [s.prestiges, 5] },
+  // ---- rotating missions ----
+  { id: 'g_k10',    en: 'Own 10 kettles',          bm: 'Miliki 10 cerek',          reward: 2,  ok: s => s.counts.cerek >= 10, p: s => [s.counts.cerek, 10] },
+  { id: 'g_full',   en: 'Own every building type', bm: 'Miliki semua jenis kedai', reward: 4,  ok: s => BUILDINGS.every(b => s.counts[b.id] >= 1), p: s => [BUILDINGS.filter(b => s.counts[b.id] >= 1).length, BUILDINGS.length] },
+  { id: 'g_ach10',  en: 'Unlock 10 achievements',  bm: 'Buka 10 pencapaian',       reward: 3,  ok: s => achCount() >= 10, p: s => [achCount(), 10] },
+  { id: 'g_buff3',  en: 'Reach 3 buff levels',     bm: 'Capai 3 level berkat',     reward: 4,  ok: s => buffTotal() >= 3, p: s => [buffTotal(), 3] },
+  { id: 'g_ads5',   en: 'Watch 5 ads',             bm: 'Tonton 5 iklan',           reward: 3,  ok: s => (s.adsTotal || 0) >= 5, p: s => [s.adsTotal || 0, 5] },
+  { id: 'g_all5',   en: 'Own 5 of every building', bm: 'Miliki 5 setiap bangunan', reward: 6,  ok: s => BUILDINGS.every(b => s.counts[b.id] >= 5), p: s => [BUILDINGS.filter(b => s.counts[b.id] >= 5).length, BUILDINGS.length] },
+  { id: 'g_k100',   en: 'Own 100 kettles',         bm: 'Miliki 100 cerek',         reward: 5,  ok: s => s.counts.cerek >= 100, p: s => [s.counts.cerek, 100] },
+  { id: 'g_ach20',  en: 'Unlock 20 achievements',  bm: 'Buka 20 pencapaian',       reward: 5,  ok: s => achCount() >= 20, p: s => [achCount(), 20] },
+  { id: 'g_tok10',  en: 'Hold 10 Warung Tokens',   bm: 'Pegang 10 Warung Token',   reward: 5,  ok: s => s.tokens >= 10, p: s => [s.tokens, 10] },
+  { id: 'g_p3',     en: 'Prestige 3 times',        bm: 'Prestij 3 kali',           reward: 8,  ok: s => s.prestiges >= 3, p: s => [s.prestiges, 3] },
+  { id: 'g_tok50',  en: 'Hold 50 Warung Tokens',   bm: 'Pegang 50 Warung Token',   reward: 10, ok: s => s.tokens >= 50, p: s => [s.tokens, 50] },
+  { id: 'g_p10',    en: 'Prestige 10 times',       bm: 'Prestij 10 kali',          reward: 12, ok: s => s.prestiges >= 10, p: s => [s.prestiges, 10] },
 ];
 
 /* ---------------- i18n ---------------- */
@@ -265,7 +268,7 @@ const T = {
 };
 
 /* ---------------- state ---------------- */
-const VERSION = '2026.11.16-16';
+const VERSION = '2026.11.16-17';
 const SAVE_KEY = 'kopitiam-kosong-v2';
 const OLD_KEY = 'kopitiam-kosong-v1';
 
