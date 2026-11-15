@@ -270,7 +270,7 @@ const T = {
 };
 
 /* ---------------- state ---------------- */
-const VERSION = '2026.11.16-21';
+const VERSION = '2026.11.16-22';
 const SAVE_KEY = 'kopitiam-kosong-v2';
 const OLD_KEY = 'kopitiam-kosong-v1';
 
@@ -936,7 +936,12 @@ function missionSlots() {
 }
 
 function activeGoals() {
-  return GOALS.filter(function (g) { return !S.goals[g.id]; }).slice(0, missionSlots());
+  const open = GOALS.filter(function (g) { return !S.goals[g.id]; });
+  const ready = open.filter(function (g) { return g.ok(S); });
+  const rest = open.filter(function (g) { return !g.ok(S); });
+  const slots = missionSlots();
+  // a finished mission can never be hidden by the slot limit
+  return ready.concat(rest).slice(0, Math.max(slots, ready.length));
 }
 
 function bindEnding() {
@@ -963,11 +968,67 @@ function buyBuff(id) {
   render(); save();
 }
 
+let mpopQ = [], mpopOpen = false, mpopTimer = null, lastReadyIds = null, currentPopupId = null;
+
+function readyGoalIds() {
+  return GOALS.filter(function (g) { return !S.goals[g.id] && g.ok(S); })
+              .map(function (g) { return g.id; });
+}
+
+function checkMissionPopups() {
+  const nowIds = readyGoalIds();
+  if (lastReadyIds === null) { lastReadyIds = nowIds; return; }   // no popups for pre-existing
+  const fresh = nowIds.filter(function (id) { return lastReadyIds.indexOf(id) === -1; });
+  lastReadyIds = nowIds;
+  if (!fresh.length) return;
+  fresh.forEach(function (id) { mpopQ.push(id); });
+  if (!mpopOpen) nextMissionPopup();
+}
+
+function nextMissionPopup() {
+  const id = mpopQ.shift();
+  if (!id) { mpopOpen = false; return; }
+  const g = GOALS.filter(function (x) { return x.id === id; })[0];
+  const el = $('missionPop');
+  if (!g || !el || S.goals[id]) { nextMissionPopup(); return; }
+  mpopOpen = true;
+  $('mpopKicker').textContent = S.lang === 'bm' ? 'MISI SIAP' : 'MISSION READY';
+  $('mpopTitle').textContent = (S.lang === 'bm' ? g.bm : g.en) + ' · +' + g.reward + ' 🫘';
+  $('mpopClaim').textContent = S.lang === 'bm' ? 'TUNTUT' : 'CLAIM';
+  currentPopupId = id;
+  el.classList.add('show');
+  clearTimeout(mpopTimer);
+  mpopTimer = setTimeout(function () { hideMissionPopup(); }, 9000);
+}
+
+function hideMissionPopup() {
+  clearTimeout(mpopTimer);
+  const el = $('missionPop');
+  if (el) el.classList.remove('show');
+  mpopOpen = false;
+  setTimeout(function () { if (!mpopOpen) nextMissionPopup(); }, 320);
+}
+
+function bindMissionPopup() {
+  const claim = $('mpopClaim'), close = $('mpopClose');
+  if (claim) claim.addEventListener('click', function () {
+    const id = mpopQ.length === 0 ? readyGoalIds()[0] : null;
+    clearTimeout(mpopTimer);
+    $('missionPop').classList.remove('show');
+    mpopOpen = false;
+    // claim whichever mission is currently displayed
+    if (currentPopupId && !S.goals[currentPopupId]) claimGoal(currentPopupId);
+    setTimeout(function () { nextMissionPopup(); }, 320);
+  });
+  if (close) close.addEventListener('click', function () { hideMissionPopup(); });
+}
+
 function claimGoal(id) {
   const g = GOALS.filter(function (x) { return x.id === id; })[0];
   if (!g || S.goals[id] || !g.ok(S)) return;
   S.goals[id] = true;
   S.beans += g.reward;
+  lastReadyIds = null;   // rebuilt on next check, no ghost popup
   SFX.cawangan();
   toast('+' + g.reward + ' ' + (S.lang === 'bm' ? 'Biji Kopi' : 'Biji Kopi'));
   render(); save();
@@ -1282,6 +1343,7 @@ function render() {
   updateMissionBadge();
   renderEmpayar();
   checkFinish();
+  checkMissionPopups();
   if ($('panel-achievements').classList.contains('active') && achSignature() !== achSig) renderAch();
   if ($('panel-buffs').classList.contains('active') && buffSignature() !== buffSig) renderBuffs();
   if ($('panel-mission').classList.contains('active') && missionSig() !== lastMissionSig) renderMissions();
@@ -1368,6 +1430,7 @@ function loop(now) {
 /* ---------------- wiring ---------------- */
 function init() {
   bindEnding();
+  bindMissionPopup();
   const hadSave = load();
   applyLang();
 

@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
 <title>Kopi Kosong Empire — Kopitiam Idle Game</title>
-<link rel="stylesheet" href="style.css?v=2026.11.16-21" />
+<link rel="stylesheet" href="style.css?v=2026.11.16-22" />
 </head>
 <body>
 
@@ -272,6 +272,18 @@
   </div>
 </div>
 
+<div id="missionPop" class="mpop" aria-live="polite">
+  <div class="mpop-card">
+    <div class="mpop-icon">🎯</div>
+    <div class="mpop-text">
+      <div class="mpop-kicker" id="mpopKicker">MISSION READY</div>
+      <div class="mpop-title" id="mpopTitle"></div>
+    </div>
+    <button id="mpopClaim">CLAIM</button>
+    <button id="mpopClose" class="mpop-x">×</button>
+  </div>
+</div>
+
 <div id="achPop" class="achpop" aria-live="polite">
   <div class="achpop-card">
     <div class="achpop-ring"></div>
@@ -301,6 +313,6 @@
 </div>
 <div id="toast" class="toast"></div>
 
-<script src="game.js?v=2026.11.16-21"></script>
+<script src="game.js?v=2026.11.16-22"></script>
 </body>
 </html>
