@@ -132,6 +132,35 @@
         <button id="resetBtn" class="btn danger">Reset</button>
       </div>
 
+      <details class="devbox" id="devBox">
+        <summary>Troubleshoot / Dev tools</summary>
+        <div class="devrow">
+          <label>Set brews (total clicks)</label>
+          <input id="devClicks" type="number" min="0" step="1" placeholder="e.g. 2500">
+          <button id="devClicksBtn" class="btn">Apply</button>
+        </div>
+        <div class="devrow">
+          <label>Set cash (RM)</label>
+          <input id="devMoney" type="number" min="0" step="0.01" placeholder="e.g. 5000">
+          <button id="devMoneyBtn" class="btn">Apply</button>
+        </div>
+        <div class="devrow">
+          <label>Give equipment</label>
+          <input id="devQty" type="number" min="0" step="1" placeholder="qty">
+          <select id="devItem"></select>
+          <button id="devGiveBtn" class="btn">Give</button>
+        </div>
+        <div class="devrow">
+          <label>Unlock all achievements</label>
+          <button id="devUnlockAll" class="btn">Do it</button>
+        </div>
+        <div class="devrow">
+          <label>State dump</label>
+          <button id="devDump" class="btn">Show</button>
+        </div>
+        <pre id="devOut" class="devout"></pre>
+      </details>
+
     </div>
   </section>
 </main>
@@ -160,9 +189,11 @@
   <div class="achpop-card">
     <div class="achpop-ring"></div>
     <div class="achpop-badge">🏆</div>
-    <div class="achpop-kicker" id="achKicker">ACHIEVEMENT UNLOCKED</div>
-    <div class="achpop-title" id="achPopTitle"></div>
-    <div class="achpop-sub" id="achPopSub"></div>
+    <div class="achpop-text">
+      <div class="achpop-kicker" id="achKicker">ACHIEVEMENT UNLOCKED</div>
+      <div class="achpop-title" id="achPopTitle"></div>
+      <div class="achpop-sub" id="achPopSub"></div>
+    </div>
     <div class="achpop-shine"></div>
   </div>
 </div>

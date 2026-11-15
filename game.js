@@ -91,14 +91,14 @@ const BUILDINGS = [
 
 const ACHIEVEMENTS = [
   // ---- brew ladder (hardcore) ----
-  { id: 'click_1',     en: 'First Brew',           bm: 'Bancuhan Pertama',      w: 1,    ok: s => s.clicks >= 1,      p: s => [s.clicks, 1] },
-  { id: 'click_100',   en: '100 Brews',            bm: '100 Bancuhan',          w: 1,    ok: s => s.clicks >= 100,    p: s => [s.clicks, 100] },
-  { id: 'click_250',   en: '250 Brews',            bm: '250 Bancuhan',          w: 1,    ok: s => s.clicks >= 250,    p: s => [s.clicks, 250] },
-  { id: 'click_600',   en: '600 Brews',            bm: '600 Bancuhan',          w: 1,    ok: s => s.clicks >= 600,    p: s => [s.clicks, 600] },
-  { id: 'click_1000',  en: '1,000 Brews',          bm: '1,000 Bancuhan',        w: 0.5,  ok: s => s.clicks >= 1000,   p: s => [s.clicks, 1000] },
-  { id: 'click_2000',  en: '2,000 Brews',          bm: '2,000 Bancuhan',        w: 0.5,  ok: s => s.clicks >= 2000,   p: s => [s.clicks, 2000] },
-  { id: 'click_5000',  en: '5,000 Brews',          bm: '5,000 Bancuhan',        w: 0.25, ok: s => s.clicks >= 5000,   p: s => [s.clicks, 5000] },
-  { id: 'click_10000', en: '10,000 Brews',         bm: '10,000 Bancuhan',       w: 0.25, ok: s => s.clicks >= 10000,  p: s => [s.clicks, 10000] },
+  { id: 'click_1', grp: 'brew',     en: 'First Brew',           bm: 'Bancuhan Pertama',      w: 1,    ok: s => s.clicks >= 1,      p: s => [s.clicks, 1] },
+  { id: 'click_100', grp: 'brew',   en: '100 Brews',            bm: '100 Bancuhan',          w: 1,    ok: s => s.clicks >= 100,    p: s => [s.clicks, 100] },
+  { id: 'click_250', grp: 'brew',   en: '250 Brews',            bm: '250 Bancuhan',          w: 1,    ok: s => s.clicks >= 250,    p: s => [s.clicks, 250] },
+  { id: 'click_600', grp: 'brew',   en: '600 Brews',            bm: '600 Bancuhan',          w: 1,    ok: s => s.clicks >= 600,    p: s => [s.clicks, 600] },
+  { id: 'click_1000', grp: 'brew',  en: '1,000 Brews',          bm: '1,000 Bancuhan',        w: 0.5,  ok: s => s.clicks >= 1000,   p: s => [s.clicks, 1000] },
+  { id: 'click_2000', grp: 'brew',  en: '2,000 Brews',          bm: '2,000 Bancuhan',        w: 0.5,  ok: s => s.clicks >= 2000,   p: s => [s.clicks, 2000] },
+  { id: 'click_5000', grp: 'brew',  en: '5,000 Brews',          bm: '5,000 Bancuhan',        w: 0.25, ok: s => s.clicks >= 5000,   p: s => [s.clicks, 5000] },
+  { id: 'click_10000', grp: 'brew', en: '10,000 Brews',         bm: '10,000 Bancuhan',       w: 0.25, ok: s => s.clicks >= 10000,  p: s => [s.clicks, 10000] },
 
   // ---- equipment ----
   { id: 'b_cerek',     en: 'First Kettle',         bm: 'Cerek Pertama',         w: 1,    ok: s => s.counts.cerek >= 1,  p: s => [s.counts.cerek, 1] },
@@ -190,7 +190,7 @@ const T = {
 };
 
 /* ---------------- state ---------------- */
-const VERSION = '2026.11.15-9';
+const VERSION = '2026.11.15-10';
 const SAVE_KEY = 'kopitiam-kosong-v2';
 const OLD_KEY = 'kopitiam-kosong-v1';
 
@@ -598,7 +598,25 @@ function updateAchBadge() {
 
 function renderAch() {
   achSig = achSignature();
-  $('achList').innerHTML = ACHIEVEMENTS.map(function (a) {
+  const brew = ACHIEVEMENTS.filter(function (a) { return a.grp === 'brew'; });
+  const rest = ACHIEVEMENTS.filter(function (a) { return a.grp !== 'brew'; });
+  const bDone = brew.filter(function (a) { return S.ach[a.id]; }).length;
+  const next = brew.filter(function (a) { return !S.ach[a.id]; })[0];
+  const pr = next ? next.p(S) : [brew.length, brew.length];
+  const pct = next ? Math.min(100, (pr[0] / Math.max(pr[1], 1)) * 100) : 100;
+  const label = next ? (S.lang === 'bm' ? next.bm : next.en) : (S.lang === 'bm' ? 'Semua tier selesai' : 'All tiers complete');
+
+  const ladder =
+    '<div class="ach ladder ' + (next ? '' : 'done') + '">' +
+      '<div class="t">' + (S.lang === 'bm' ? 'Larian Bancuhan' : 'Brew Ladder') +
+        '<span class="tier">TIER ' + bDone + ' / ' + brew.length + '</span></div>' +
+      '<div class="d">' + (next ? (S.lang === 'bm' ? 'Seterusnya: ' : 'Next: ') + label : label) + '</div>' +
+      '<div class="nbar"><i style="width:' + pct.toFixed(1) + '%"></i></div>' +
+      '<div class="st">' + Math.round(pr[0]).toLocaleString('en-MY') + ' / ' + Math.round(pr[1]).toLocaleString('en-MY') +
+        ' · ' + bDone + ' ' + (S.lang === 'bm' ? 'dibuka' : 'unlocked') + '</div>' +
+    '</div>';
+
+  const cards = rest.map(function (a) {
     const done = !!S.ach[a.id];
     return '<div class="ach ' + (done ? 'done' : '') + '">' +
       '<div class="t">' + (S.lang === 'bm' ? a.bm : a.en) + '</div>' +
@@ -606,6 +624,8 @@ function renderAch() {
       '<div class="st">' + (done ? '✓ ' + t().achDone : t().achNot) + '</div>' +
     '</div>';
   }).join('');
+
+  $('achList').innerHTML = ladder + cards;
   updateAchBadge();
 }
 
@@ -793,7 +813,64 @@ function init() {
 
   function toggleSound() {
     S.soundOn = !S.soundOn;
-    $('soundBtn').textContent = S.soundOn ? '🔊' : '🔇';
+    /* ---- troubleshoot panel ---- */
+  const devOut = $('devOut');
+  const devMsg = function (txt) { devOut.textContent = txt; devOut.classList.add('show'); };
+
+  BUILDINGS.forEach(function (b) {
+    const o = document.createElement('option');
+    o.value = b.id;
+    o.textContent = S.lang === 'bm' ? b.name : b.nameEn;
+    $('devItem').appendChild(o);
+  });
+
+  $('devClicksBtn').addEventListener('click', function () {
+    const v = parseInt($('devClicks').value, 10);
+    if (isNaN(v) || v < 0) return devMsg('Enter a number of brews.');
+    S.clicks = v;
+    checkAchievements(); render(); save();
+    devMsg('clicks = ' + v + '\nachievements unlocked: ' + achCount() + '/' + ACHIEVEMENTS.length +
+           '\nbonus: +' + achBonus().toFixed(2) + '%');
+  });
+
+  $('devMoneyBtn').addEventListener('click', function () {
+    const v = parseFloat($('devMoney').value);
+    if (isNaN(v) || v < 0) return devMsg('Enter an amount in RM.');
+    S.money = fromNum(v);
+    S.lifetime = fromNum(Math.max(v, val(S.lifetime)));
+    render(); save();
+    devMsg('cash = ' + fmtRM(S.money) + '\nlifetime = ' + fmtRM(S.lifetime));
+  });
+
+  $('devGiveBtn').addEventListener('click', function () {
+    const id = $('devItem').value;
+    const q = parseInt($('devQty').value, 10);
+    if (isNaN(q) || q < 0) return devMsg('Enter a quantity.');
+    S.counts[id] = (S.counts[id] || 0) + q;
+    checkAchievements(); render(); save();
+    devMsg(id + ' +' + q + ' → now ' + S.counts[id]);
+  });
+
+  $('devUnlockAll').addEventListener('click', function () {
+    ACHIEVEMENTS.forEach(function (a) { S.ach[a.id] = true; });
+    render(); save();
+    devMsg('All ' + ACHIEVEMENTS.length + ' achievements unlocked.\nbonus: +' + achBonus().toFixed(2) + '%');
+  });
+
+  $('devDump').addEventListener('click', function () {
+    const raw = JSON.stringify(S);
+    devMsg('build: ' + VERSION +
+      '\nlang: ' + S.lang + '  sound: ' + S.soundOn +
+      '\ncash: ' + fmtRM(S.money) + '  lifetime: ' + fmtRM(S.lifetime) +
+      '\nincome: ' + fmtRM(cps()) + '/s  click: ' + fmtRM(clickPower()) +
+      '\nclicks: ' + S.clicks + '  tokens: ' + S.tokens + '  stars: ' + S.bintang +
+      '\nmultiplier: x' + mult().toFixed(3) +
+      '\nachievements: ' + achCount() + '/' + ACHIEVEMENTS.length + ' (+' + achBonus().toFixed(2) + '%)' +
+      '\ncounts: ' + JSON.stringify(S.counts) +
+      '\nsave size: ' + raw.length + ' bytes');
+  });
+
+  $('soundBtn').textContent = S.soundOn ? '🔊' : '🔇';
     $('soundToggle').textContent = S.soundOn ? 'ON' : 'OFF';
     $('soundToggle').classList.toggle('on', S.soundOn);
     if (S.soundOn) { audio(); sfxTap(); }
@@ -831,6 +908,63 @@ function init() {
     hardReset = true;
     try { localStorage.removeItem(SAVE_KEY); localStorage.removeItem(OLD_KEY); } catch (e) {}
     location.reload();
+  });
+
+  /* ---- troubleshoot panel ---- */
+  const devOut = $('devOut');
+  const devMsg = function (txt) { devOut.textContent = txt; devOut.classList.add('show'); };
+
+  BUILDINGS.forEach(function (b) {
+    const o = document.createElement('option');
+    o.value = b.id;
+    o.textContent = S.lang === 'bm' ? b.name : b.nameEn;
+    $('devItem').appendChild(o);
+  });
+
+  $('devClicksBtn').addEventListener('click', function () {
+    const v = parseInt($('devClicks').value, 10);
+    if (isNaN(v) || v < 0) return devMsg('Enter a number of brews.');
+    S.clicks = v;
+    checkAchievements(); render(); save();
+    devMsg('clicks = ' + v + '\nachievements unlocked: ' + achCount() + '/' + ACHIEVEMENTS.length +
+           '\nbonus: +' + achBonus().toFixed(2) + '%');
+  });
+
+  $('devMoneyBtn').addEventListener('click', function () {
+    const v = parseFloat($('devMoney').value);
+    if (isNaN(v) || v < 0) return devMsg('Enter an amount in RM.');
+    S.money = fromNum(v);
+    S.lifetime = fromNum(Math.max(v, val(S.lifetime)));
+    render(); save();
+    devMsg('cash = ' + fmtRM(S.money) + '\nlifetime = ' + fmtRM(S.lifetime));
+  });
+
+  $('devGiveBtn').addEventListener('click', function () {
+    const id = $('devItem').value;
+    const q = parseInt($('devQty').value, 10);
+    if (isNaN(q) || q < 0) return devMsg('Enter a quantity.');
+    S.counts[id] = (S.counts[id] || 0) + q;
+    checkAchievements(); render(); save();
+    devMsg(id + ' +' + q + ' → now ' + S.counts[id]);
+  });
+
+  $('devUnlockAll').addEventListener('click', function () {
+    ACHIEVEMENTS.forEach(function (a) { S.ach[a.id] = true; });
+    render(); save();
+    devMsg('All ' + ACHIEVEMENTS.length + ' achievements unlocked.\nbonus: +' + achBonus().toFixed(2) + '%');
+  });
+
+  $('devDump').addEventListener('click', function () {
+    const raw = JSON.stringify(S);
+    devMsg('build: ' + VERSION +
+      '\nlang: ' + S.lang + '  sound: ' + S.soundOn +
+      '\ncash: ' + fmtRM(S.money) + '  lifetime: ' + fmtRM(S.lifetime) +
+      '\nincome: ' + fmtRM(cps()) + '/s  click: ' + fmtRM(clickPower()) +
+      '\nclicks: ' + S.clicks + '  tokens: ' + S.tokens + '  stars: ' + S.bintang +
+      '\nmultiplier: x' + mult().toFixed(3) +
+      '\nachievements: ' + achCount() + '/' + ACHIEVEMENTS.length + ' (+' + achBonus().toFixed(2) + '%)' +
+      '\ncounts: ' + JSON.stringify(S.counts) +
+      '\nsave size: ' + raw.length + ' bytes');
   });
 
   $('soundBtn').textContent = S.soundOn ? '🔊' : '🔇';
