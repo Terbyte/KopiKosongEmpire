@@ -265,7 +265,7 @@ const T = {
 };
 
 /* ---------------- state ---------------- */
-const VERSION = '2026.11.16-12';
+const VERSION = '2026.11.16-13';
 const SAVE_KEY = 'kopitiam-kosong-v2';
 const OLD_KEY = 'kopitiam-kosong-v1';
 
@@ -806,6 +806,14 @@ let achSig = '';
 function achSignature() {
   return S.lang + '|' + ACHIEVEMENTS.map(function (a) { return S.ach[a.id] ? '1' : '0'; }).join('');
 }
+function updateMissionBadge() {
+  const el = $('tabMission');
+  if (!el) return;
+  const ready = GOALS.filter(function (g) { return !S.goals[g.id] && g.ok(S); }).length;
+  el.innerHTML = (S.lang === 'bm' ? 'Misi' : 'Missions') +
+    (ready > 0 ? ' <span class="badge">' + ready + '</span>' : '');
+}
+
 function updateAchBadge() {
   const badge = $('achBadge');
   if (badge) badge.textContent = achCount() + '/' + ACHIEVEMENTS.length;
@@ -1154,6 +1162,7 @@ function render() {
   renderPrestige();
   renderNotices();
   updateAchBadge();
+  updateMissionBadge();
   if ($('panel-achievements').classList.contains('active') && achSignature() !== achSig) renderAch();
   if ($('panel-buffs').classList.contains('active') && buffSignature() !== buffSig) renderBuffs();
   if ($('panel-mission').classList.contains('active') && missionSig() !== lastMissionSig) renderMissions();
