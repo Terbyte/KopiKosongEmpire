@@ -173,8 +173,8 @@ function buffCost(b) { return Math.round(b.baseCost * Math.pow(BUFF_GROWTH, buff
 
 const GOALS = [
   { id: 'g_brew100',  en: 'Brew 100 cups',            bm: 'Bancuh 100 cawan',        reward: 1, ok: s => s.clicks >= 100,   p: s => [s.clicks, 100] },
-  { id: 'g_k10',      en: 'Own 10 kettles',           bm: 'Miliki 10 cerek',         reward: 1, ok: s => s.counts.cerek >= 10, p: s => [s.counts.cerek, 10] },
   { id: 'g_rm1k',     en: 'Earn RM 1,000',            bm: 'Peroleh RM 1,000',        reward: 2, ok: s => s.lifetime.e >= 3, p: s => [Math.min(val(s.lifetime), 1000), 1000] },
+  { id: 'g_k10',      en: 'Own 10 kettles',           bm: 'Miliki 10 cerek',         reward: 1, ok: s => s.counts.cerek >= 10, p: s => [s.counts.cerek, 10] },
   { id: 'g_full',     en: 'Own every building type',  bm: 'Miliki semua jenis kedai',reward: 3, ok: s => BUILDINGS.every(b => s.counts[b.id] >= 1), p: s => [BUILDINGS.filter(b => s.counts[b.id] >= 1).length, BUILDINGS.length] },
   { id: 'g_brew1k',   en: 'Brew 1,000 cups',          bm: 'Bancuh 1,000 cawan',      reward: 2, ok: s => s.clicks >= 1000,  p: s => [s.clicks, 1000] },
   { id: 'g_ach10',    en: 'Unlock 10 achievements',   bm: 'Buka 10 pencapaian',      reward: 3, ok: s => achCount() >= 10,  p: s => [achCount(), 10] },
@@ -265,7 +265,7 @@ const T = {
 };
 
 /* ---------------- state ---------------- */
-const VERSION = '2026.11.16-11';
+const VERSION = '2026.11.16-12';
 const SAVE_KEY = 'kopitiam-kosong-v2';
 const OLD_KEY = 'kopitiam-kosong-v1';
 
@@ -815,7 +815,7 @@ function updateAchBadge() {
 
 function missionSlots() {
   const types = BUILDINGS.filter(function (b) { return (S.counts[b.id] || 0) > 0; }).length;
-  return Math.min(5, 1 + types);
+  return Math.min(5, 2 + types);
 }
 
 function activeGoals() {
