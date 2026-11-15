@@ -137,6 +137,10 @@ main {
 /* ---------- counter / click area ---------- */
 .counter {
   align-self: start;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
   background:
     linear-gradient(rgba(255,255,255,.04), rgba(0,0,0,.25)),
     repeating-linear-gradient(90deg, #4a2f1d 0 22px, #452c1b 22px 44px);
@@ -207,7 +211,13 @@ main {
   text-transform: uppercase;
   color: #c9a97a;
 }
-.milestones ul { margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.6; opacity: .9; }
+.milestones ul { margin: 0; padding-left: 0; list-style: none; font-size: 13px; line-height: 1.5; opacity: .95; }
+.milestones li.notice { margin-bottom: 9px; }
+.milestones li.notice:last-child { margin-bottom: 0; }
+.nrow { display: flex; justify-content: space-between; gap: 10px; font-size: 12.5px; }
+.nnum { font-family: monospace; color: #c9a97a; white-space: nowrap; }
+.nbar { height: 4px; background: rgba(0,0,0,.45); border-radius: 3px; margin-top: 4px; overflow: hidden; }
+.nbar i { display: block; height: 100%; background: linear-gradient(90deg, #d1931a, #f0b429); border-radius: 3px; transition: width .3s ease; }
 .milestones li.done { color: var(--daun); text-decoration: line-through; opacity: .6; }
 
 /* ---------- shop ---------- */
@@ -449,7 +459,9 @@ footer {
 
 /* panels */
 .panel { display: none; }
-.panel.active { display: grid; grid-template-columns: minmax(320px, 1fr) minmax(360px, 470px); gap: 18px; }
+.panel.active { display: block; }
+.panel.active .counter { max-width: 760px; margin: 0 auto 18px; }
+.panel.active .shop { max-width: 980px; margin: 0 auto; }
 @media (max-width: 880px) { .panel.active { grid-template-columns: 1fr; } }
 
 .card {

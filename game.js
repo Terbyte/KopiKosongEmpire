@@ -90,25 +90,25 @@ const BUILDINGS = [
 ];
 
 const ACHIEVEMENTS = [
-  { id: 'first_click', en: 'First Brew',           bm: 'Bancuhan Pertama',      ok: s => s.clicks >= 1 },
-  { id: 'click_100',   en: '100 Brews',            bm: '100 Bancuhan',          ok: s => s.clicks >= 100 },
-  { id: 'click_1000',  en: '1,000 Brews',          bm: '1,000 Bancuhan',        ok: s => s.clicks >= 1000 },
-  { id: 'b_cerek',     en: 'First Kettle',         bm: 'Cerek Pertama',         ok: s => s.counts.cerek >= 1 },
-  { id: 'b_cerek_50',  en: '50 Kettles',           bm: '50 Cerek',              ok: s => s.counts.cerek >= 50 },
-  { id: 'b_tapis',     en: 'Cloth Filter',         bm: 'Tapis Kopi',            ok: s => s.counts.tapis >= 1 },
-  { id: 'b_mesin',     en: 'Coffee Machine',       bm: 'Mesin Kopi',            ok: s => s.counts.mesin >= 1 },
-  { id: 'b_roti',      en: 'Roti Canai Griddle',   bm: 'Dapur Roti Canai',      ok: s => s.counts.roti >= 1 },
-  { id: 'b_tetap',     en: 'Loyal Regulars',       bm: 'Pelanggan Tetap',       ok: s => s.counts.tetap >= 1 },
-  { id: 'b_rider',     en: 'Delivery Rider',       bm: 'Rider Penghantaran',    ok: s => s.counts.rider >= 1 },
-  { id: 'b_cawangan',  en: 'Second Outlet',        bm: 'Cawangan Kedua',        ok: s => s.counts.cawangan >= 1 },
-  { id: 'b_francais',  en: 'National Franchise',   bm: 'Francais Kebangsaan',   ok: s => s.counts.francais >= 1 },
-  { id: 'earn_1k',     en: 'RM 1,000 Earned',      bm: 'RM 1,000 Diperoleh',    ok: s => s.lifetime.e >= 3 },
-  { id: 'earn_1m',     en: 'RM 1,000,000',         bm: 'RM 1 Juta',             ok: s => s.lifetime.e >= 6 },
-  { id: 'p1_first',    en: 'First Balik Kampung',  bm: 'Balik Kampung Pertama', ok: s => s.prestiges >= 1 },
-  { id: 'p1_five',     en: '5x Balik Kampung',     bm: '5x Balik Kampung',      ok: s => s.prestiges >= 5 },
-  { id: 'all_types',   en: 'Full Menu',            bm: 'Menu Penuh',            ok: s => BUILDINGS.every(b => s.counts[b.id] >= 1) },
-  { id: 'tokens_100',  en: '100 Warung Tokens',    bm: '100 Warung Token',      ok: s => s.tokens >= 100 },
-  { id: 'star_1',      en: 'First Franchise Star', bm: 'Bintang Francais',      ok: s => s.bintang >= 1 },
+  { id: 'first_click', en: 'First Brew',           bm: 'Bancuhan Pertama',      ok: s => s.clicks >= 1,      p: s => [s.clicks, 1] },
+  { id: 'click_100',   en: '100 Brews',            bm: '100 Bancuhan',          ok: s => s.clicks >= 100,    p: s => [s.clicks, 100] },
+  { id: 'click_1000',  en: '1,000 Brews',          bm: '1,000 Bancuhan',        ok: s => s.clicks >= 1000,   p: s => [s.clicks, 1000] },
+  { id: 'b_cerek',     en: 'First Kettle',         bm: 'Cerek Pertama',         ok: s => s.counts.cerek >= 1,  p: s => [s.counts.cerek, 1] },
+  { id: 'b_cerek_50',  en: '50 Kettles',           bm: '50 Cerek',              ok: s => s.counts.cerek >= 50, p: s => [s.counts.cerek, 50] },
+  { id: 'b_tapis',     en: 'Cloth Filter',         bm: 'Tapis Kopi',            ok: s => s.counts.tapis >= 1,  p: s => [s.counts.tapis, 1] },
+  { id: 'b_mesin',     en: 'Coffee Machine',       bm: 'Mesin Kopi',            ok: s => s.counts.mesin >= 1,  p: s => [s.counts.mesin, 1] },
+  { id: 'b_roti',      en: 'Roti Canai Griddle',   bm: 'Dapur Roti Canai',      ok: s => s.counts.roti >= 1,   p: s => [s.counts.roti, 1] },
+  { id: 'b_tetap',     en: 'Loyal Regulars',       bm: 'Pelanggan Tetap',       ok: s => s.counts.tetap >= 1,  p: s => [s.counts.tetap, 1] },
+  { id: 'b_rider',     en: 'Delivery Rider',       bm: 'Rider Penghantaran',    ok: s => s.counts.rider >= 1,  p: s => [s.counts.rider, 1] },
+  { id: 'b_cawangan',  en: 'Second Outlet',        bm: 'Cawangan Kedua',        ok: s => s.counts.cawangan >= 1, p: s => [s.counts.cawangan, 1] },
+  { id: 'b_francais',  en: 'National Franchise',   bm: 'Francais Kebangsaan',   ok: s => s.counts.francais >= 1, p: s => [s.counts.francais, 1] },
+  { id: 'earn_1k',     en: 'RM 1,000 Earned',      bm: 'RM 1,000 Diperoleh',    ok: s => s.lifetime.e >= 3,  p: s => [Math.min(val(s.lifetime), 1000), 1000] },
+  { id: 'earn_1m',     en: 'RM 1,000,000',         bm: 'RM 1 Juta',             ok: s => s.lifetime.e >= 6,  p: s => [Math.min(val(s.lifetime), 1000000), 1000000] },
+  { id: 'p1_first',    en: 'First Balik Kampung',  bm: 'Balik Kampung Pertama', ok: s => s.prestiges >= 1,   p: s => [s.prestiges, 1] },
+  { id: 'p1_five',     en: '5x Balik Kampung',     bm: '5x Balik Kampung',      ok: s => s.prestiges >= 5,   p: s => [s.prestiges, 5] },
+  { id: 'all_types',   en: 'Full Menu',            bm: 'Menu Penuh',            ok: s => BUILDINGS.every(b => s.counts[b.id] >= 1), p: s => [BUILDINGS.filter(b => s.counts[b.id] >= 1).length, BUILDINGS.length] },
+  { id: 'tokens_100',  en: '100 Warung Tokens',    bm: '100 Warung Token',      ok: s => s.tokens >= 100,    p: s => [s.tokens, 100] },
+  { id: 'star_1',      en: 'First Franchise Star', bm: 'Bintang Francais',      ok: s => s.bintang >= 1,     p: s => [s.bintang, 1] },
 ];
 
 /* ---------------- i18n ---------------- */
@@ -481,8 +481,17 @@ function renderPrestige() {
 
 function renderNotices() {
   const next = ACHIEVEMENTS.filter(function (a) { return !S.ach[a.id]; }).slice(0, 4);
+  const fmtn = function (x) { return x >= 10000 ? fmt(fromNum(x)) : Math.round(x).toLocaleString('en-MY'); };
   $('milestones').innerHTML = next.length
-    ? next.map(function (a) { return '<li>' + (S.lang === 'bm' ? a.bm : a.en) + '</li>'; }).join('')
+    ? next.map(function (a) {
+        const pr = a.p ? a.p(S) : [0, 1];
+        const pct = Math.max(0, Math.min(100, (pr[0] / Math.max(pr[1], 0.0001)) * 100));
+        return '<li class="notice">' +
+          '<div class="nrow"><span>' + (S.lang === 'bm' ? a.bm : a.en) + '</span>' +
+          '<span class="nnum">' + fmtn(pr[0]) + ' / ' + fmtn(pr[1]) + '</span></div>' +
+          '<div class="nbar"><i style="width:' + pct.toFixed(1) + '%"></i></div>' +
+        '</li>';
+      }).join('')
     : '<li>' + (S.lang === 'bm' ? 'Semua pencapaian dibuka!' : 'All achievements unlocked!') + '</li>';
 }
 
