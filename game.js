@@ -180,7 +180,7 @@ const T = {
 };
 
 /* ---------------- state ---------------- */
-const VERSION = '2026.11.15-7';
+const VERSION = '2026.11.15-8';
 const SAVE_KEY = 'kopitiam-kosong-v2';
 const OLD_KEY = 'kopitiam-kosong-v1';
 
@@ -695,7 +695,18 @@ function applyLang() {
   $('p2Title').textContent = d.p2;
   $('langBtn').textContent = S.lang === 'en' ? 'EN' : 'BM';
   const vl = $('verLine');
-  if (vl) vl.textContent = 'Kopi Kosong Empire · build ' + VERSION + (S.lang === 'bm' ? ' · muat semula (Ctrl+F5) jika tidak berubah' : ' · press Ctrl+F5 if something looks stale');
+  if (vl) {
+    let stamp = '';
+    try {
+      const d = new Date(document.lastModified);
+      if (!isNaN(d.getTime())) {
+        stamp = d.toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+      }
+    } catch (e) {}
+    const tip = S.lang === 'bm' ? 'muat semula jika tidak berubah' : 'hard-refresh if stale';
+    vl.innerHTML = 'Kopi Kosong Empire · build <b>' + VERSION + '</b>' +
+      (stamp ? ' · updated ' + stamp : '') + ' · ' + tip;
+  }
   document.querySelectorAll('#langSeg button').forEach(function (b) {
     b.classList.toggle('active', b.dataset.lang === S.lang);
   });
