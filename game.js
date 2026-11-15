@@ -137,13 +137,38 @@ EQ_TIERS.forEach(function (row) {
   });
 });
 
+
+/* ---------------- mystic buffs & goals ---------------- */
+const BUFFS = [
+  { id: 'azimat',  icon: '\ud83e\uddfF', en: 'Bomoh\u2019s Charm',  bm: 'Azimat Bomoh',      cost: 5,  enD: '+50% click value',                        bmD: '+50% nilai klik' },
+  { id: 'toyol',   icon: '\ud83d\udc7a', en: 'Helpful Toyol',      bm: 'Toyol Penolong',    cost: 8,  enD: '+10% income from every outlet',           bmD: '+10% pendapatan semua kedai' },
+  { id: 'jam',     icon: '\u23f3',       en: 'Hourglass of Ages',  bm: 'Jam Pasir Sakti',   cost: 10, enD: '+2 hours offline earnings',               bmD: '+2 jam pendapatan offline' },
+  { id: 'naga',    icon: '\ud83d\udc09', en: 'Coffee Dragon',      bm: 'Naga Kopi',         cost: 12, enD: 'Offline rate 50% \u2192 75%',             bmD: 'Kadar offline 50% \u2192 75%' },
+  { id: 'keris',   icon: '\ud83d\udde1\ufe0f', en: 'Ancient Keris',      bm: 'Keris Tua',         cost: 14, enD: '+25% income',                             bmD: '+25% pendapatan' },
+  { id: 'bunga',   icon: '\ud83c\udf38', en: 'Kantan Flower',      bm: 'Bunga Kantan',      cost: 20, enD: '+20% income',                             bmD: '+20% pendapatan' },
+  { id: 'semangat',icon: '\u2728',       en: 'Shop Spirit',        bm: 'Semangat Kedai',    cost: 25, enD: 'Each click also earns 1% of your income', bmD: 'Setiap klik turut dapat 1% pendapatan' },
+];
+
+const GOALS = [
+  { id: 'g_brew100',  en: 'Brew 100 cups',            bm: 'Bancuh 100 cawan',        reward: 2, ok: s => s.clicks >= 100,   p: s => [s.clicks, 100] },
+  { id: 'g_k10',      en: 'Own 10 kettles',           bm: 'Miliki 10 cerek',         reward: 2, ok: s => s.counts.cerek >= 10, p: s => [s.counts.cerek, 10] },
+  { id: 'g_rm1k',     en: 'Earn RM 1,000',            bm: 'Peroleh RM 1,000',        reward: 3, ok: s => s.lifetime.e >= 3, p: s => [Math.min(val(s.lifetime), 1000), 1000] },
+  { id: 'g_full',     en: 'Own every building type',  bm: 'Miliki semua jenis kedai',reward: 5, ok: s => BUILDINGS.every(b => s.counts[b.id] >= 1), p: s => [BUILDINGS.filter(b => s.counts[b.id] >= 1).length, BUILDINGS.length] },
+  { id: 'g_brew1k',   en: 'Brew 1,000 cups',          bm: 'Bancuh 1,000 cawan',      reward: 4, ok: s => s.clicks >= 1000,  p: s => [s.clicks, 1000] },
+  { id: 'g_ach10',    en: 'Unlock 10 achievements',   bm: 'Buka 10 pencapaian',      reward: 4, ok: s => achCount() >= 10,  p: s => [achCount(), 10] },
+  { id: 'g_rm100k',   en: 'Earn RM 100,000',          bm: 'Peroleh RM 100,000',      reward: 5, ok: s => s.lifetime.e >= 5, p: s => [Math.min(val(s.lifetime), 100000), 100000] },
+  { id: 'g_k50',      en: 'Own 50 kettles',           bm: 'Miliki 50 cerek',         reward: 5, ok: s => s.counts.cerek >= 50, p: s => [s.counts.cerek, 50] },
+  { id: 'g_tok10',    en: 'Reach 10 Warung Tokens',   bm: 'Capai 10 Warung Token',   reward: 6, ok: s => s.tokens >= 10,   p: s => [s.tokens, 10] },
+  { id: 'g_rm10m',    en: 'Earn RM 10 million',       bm: 'Peroleh RM 10 juta',      reward: 8, ok: s => s.lifetime.e >= 7, p: s => [Math.min(val(s.lifetime), 1e7), 1e7] },
+];
+
 /* ---------------- i18n ---------------- */
 const T = {
   en: {
     tagline: 'Small warung, big dreams 🇲🇾',
     rateUnit: 'RM / sec', brew: 'BREW KOPI', notice: 'Notice Board',
     shop: 'Equipment & Outlets', buy: 'BUY',
-    tabShop: 'Shop', tabAch: 'Achievements', tabStats: 'Stats', tabSet: 'Settings',
+    tabShop: 'Shop', tabAch: 'Achievements', tabStats: 'Stats', tabSet: 'Settings', tabBuffs: 'Buffs',
     achTitle: 'Achievements', achSub: 'Every tier gives a permanent earnings bonus. Harder tiers give less.',
     achDone: 'Unlocked', achNot: 'Locked',
     statsTitle: 'Statistics',
@@ -175,7 +200,7 @@ const T = {
     tagline: 'Warung kecil, impian besar 🇲🇾',
     rateUnit: 'RM / saat', brew: 'BANCUH KOPI', notice: 'Papan Notis',
     shop: 'Peralatan & Kedai', buy: 'BELI',
-    tabShop: 'Kedai', tabAch: 'Pencapaian', tabStats: 'Statistik', tabSet: 'Tetapan',
+    tabShop: 'Kedai', tabAch: 'Pencapaian', tabStats: 'Statistik', tabSet: 'Tetapan', tabBuffs: 'Berkat',
     achTitle: 'Pencapaian', achSub: 'Setiap tier memberi bonus pendapatan kekal. Tier lebih susah beri lebih sedikit.',
     achDone: 'Dibuka', achNot: 'Belum',
     statsTitle: 'Statistik',
@@ -206,7 +231,7 @@ const T = {
 };
 
 /* ---------------- state ---------------- */
-const VERSION = '2026.11.15-12';
+const VERSION = '2026.11.16-1';
 const SAVE_KEY = 'kopitiam-kosong-v2';
 const OLD_KEY = 'kopitiam-kosong-v1';
 
@@ -218,6 +243,9 @@ let S = {
   bintang: 0,
   prestiges: 0,
   ach: {},
+  beans: 0,
+  buffs: {},
+  goals: {},
   soundOn: true,
   lang: 'en',
   startedAt: Date.now(),
@@ -239,10 +267,23 @@ function achBonus() {
   for (const a of ACHIEVEMENTS) if (S.ach[a.id]) b += (a.w || 1);
   return b;
 }
-function mult() {
-  return (1 + S.tokens * 0.1) * (1 + S.bintang * 0.5) * (1 + achBonus() / 100);
+function hasBuff(id) { return !!S.buffs[id]; }
+function buffIncomeMult() {
+  let m = 1;
+  if (hasBuff('toyol')) m += 0.10;
+  if (hasBuff('keris')) m += 0.25;
+  if (hasBuff('bunga')) m += 0.20;
+  return m;
 }
-function clickPower() { return fromNum((CLICK_BASE + S.clicks * 0.0005) * mult()); }
+function mult() {
+  return (1 + S.tokens * 0.1) * (1 + S.bintang * 0.5) * (1 + achBonus() / 100) * buffIncomeMult();
+}
+function clickPower() {
+  let v = (CLICK_BASE + S.clicks * 0.0005) * mult();
+  if (hasBuff('azimat')) v *= 1.5;
+  if (hasBuff('semangat')) v += val(cps()) * 0.01;
+  return fromNum(v);
+}
 function cps() {
   let total = 0;
   for (const b of BUILDINGS) total += (S.counts[b.id] || 0) * b.cps;
@@ -519,6 +560,7 @@ function checkAchievements() {
   for (const a of ACHIEVEMENTS) {
     if (!S.ach[a.id] && a.ok(S)) {
       S.ach[a.id] = true;
+      S.beans += 1;
       queueAch(a);
     }
   }
@@ -543,6 +585,9 @@ function load() {
     S.soundOn = d.soundOn !== false;
     S.lang = (d.lang === 'bm') ? 'bm' : 'en';
     S.ach = d.ach || {};
+    S.beans = d.beans | 0;
+    S.buffs = d.buffs || {};
+    S.goals = d.goals || {};
     S.startedAt = d.startedAt || Date.now();
     S.counts = Object.assign({}, d.counts);
     BUILDINGS.forEach(b => { S.counts[b.id] = S.counts[b.id] | 0; });
@@ -555,9 +600,11 @@ function load() {
     }
 
     const elapsed = Math.max(0, (Date.now() - (d.lastSeen || Date.now())) / 1000);
-    const capped = Math.min(elapsed, OFFLINE_CAP_HOURS * 3600);
+    const capH = OFFLINE_CAP_HOURS + (hasBuff('jam') ? 2 : 0);
+    const rate = hasBuff('naga') ? 0.75 : OFFLINE_RATE;
+    const capped = Math.min(elapsed, capH * 3600);
     if (capped > 60) {
-      const gain = mul(cps(), fromNum(capped * OFFLINE_RATE));
+      const gain = mul(cps(), fromNum(capped * rate));
       S.money = add(S.money, gain);
       S.lifetime = add(S.lifetime, gain);
       setTimeout(() => toast(t().toastBack(fmtRM(gain))), 500);
@@ -615,6 +662,77 @@ function achSignature() {
 function updateAchBadge() {
   const badge = $('achBadge');
   if (badge) badge.textContent = achCount() + '/' + ACHIEVEMENTS.length;
+  const bb = $('beanBadge');
+  if (bb) bb.textContent = S.beans;
+}
+
+function activeGoals() {
+  return GOALS.filter(function (g) { return !S.goals[g.id]; }).slice(0, 3);
+}
+
+function buyBuff(id) {
+  const b = BUFFS.filter(function (x) { return x.id === id; })[0];
+  if (!b || S.buffs[id] || S.beans < b.cost) return;
+  S.beans -= b.cost;
+  S.buffs[id] = true;
+  sfxAch();
+  toast((S.lang === 'bm' ? 'Berkat diperoleh: ' : 'Blessing gained: ') + (S.lang === 'bm' ? b.bm : b.en));
+  render(); save();
+}
+
+function claimGoal(id) {
+  const g = GOALS.filter(function (x) { return x.id === id; })[0];
+  if (!g || S.goals[id] || !g.ok(S)) return;
+  S.goals[id] = true;
+  S.beans += g.reward;
+  SFX.cawangan();
+  toast('+' + g.reward + ' ' + (S.lang === 'bm' ? 'Biji Kopi' : 'Biji Kopi'));
+  render(); save();
+}
+
+let buffSig = '';
+function buffSignature() {
+  const goals = activeGoals().map(function (g) { return g.id + (g.ok(S) ? '1' : '0'); }).join(',');
+  return S.lang + '|' + S.beans + '|' + Object.keys(S.buffs).sort().join(',') + '|' + goals;
+}
+
+function renderBuffs() {
+  buffSig = buffSignature();
+  const d = t();
+  $('beanCount').textContent = S.beans;
+  const bb = $('beanBadge');
+  if (bb) bb.textContent = S.beans;
+
+  $('buffList').innerHTML = BUFFS.map(function (b) {
+    const owned = !!S.buffs[b.id];
+    const afford = S.beans >= b.cost;
+    return '<div class="buff ' + (owned ? 'owned' : '') + '">' +
+      '<div class="icon">' + b.icon + '</div>' +
+      '<div class="bn">' + (S.lang === 'bm' ? b.bm : b.en) + '</div>' +
+      '<div class="bd">' + (S.lang === 'bm' ? b.bmD : b.enD) + '</div>' +
+      '<div class="bc">' +
+        '<span class="cost">' + (owned ? '✓ ' + (S.lang === 'bm' ? 'kekal' : 'permanent') : b.cost + ' biji') + '</span>' +
+        '<button data-buff="' + b.id + '" ' + (owned || !afford ? 'disabled' : '') + '>' +
+          (owned ? (S.lang === 'bm' ? 'DIMILIKI' : 'OWNED') : (S.lang === 'bm' ? 'BELI' : 'BUY')) +
+        '</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  const goals = activeGoals();
+  $('goalList').innerHTML = goals.length ? goals.map(function (g) {
+    const pr = g.p(S);
+    const done = g.ok(S);
+    const fmtn = function (x) { return x >= 10000 ? fmt(fromNum(x)) : Math.round(x).toLocaleString('en-MY'); };
+    return '<div class="goal ' + (done ? 'done' : '') + '">' +
+      '<div class="gtxt">' + (S.lang === 'bm' ? g.bm : g.en) +
+        '<div class="gprog">' + fmtn(pr[0]) + ' / ' + fmtn(pr[1]) + '</div></div>' +
+      '<span class="reward">+' + g.reward + ' 🫘</span>' +
+      '<button data-goal="' + g.id + '" ' + (done ? '' : 'disabled') + '>' +
+        (done ? (S.lang === 'bm' ? 'TUNTUT' : 'CLAIM') : (S.lang === 'bm' ? 'BELUM' : 'LOCKED')) +
+      '</button>' +
+    '</div>';
+  }).join('') : '<div class="muted">' + (S.lang === 'bm' ? 'Semua matlamat selesai.' : 'All goals complete.') + '</div>';
 }
 
 function ladderInfo(grp) {
@@ -759,6 +877,7 @@ function render() {
   renderNotices();
   updateAchBadge();
   if ($('panel-achievements').classList.contains('active') && achSignature() !== achSig) renderAch();
+  if ($('panel-buffs').classList.contains('active') && buffSignature() !== buffSig) renderBuffs();
   if ($('panel-stats').classList.contains('active')) renderStats();
 }
 
@@ -851,6 +970,7 @@ function init() {
     $('panel-' + btn.dataset.tab).classList.add('active');
     if (btn.dataset.tab === 'achievements') renderAch();
     if (btn.dataset.tab === 'stats') renderStats();
+    if (btn.dataset.tab === 'buffs') renderBuffs();
     sfxTap();
   });
 
@@ -939,6 +1059,15 @@ function init() {
   }
   $('soundBtn').addEventListener('click', toggleSound);
   $('soundToggle').addEventListener('click', toggleSound);
+
+  $('buffList').addEventListener('click', function (e) {
+    const btn = e.target.closest('button[data-buff]');
+    if (btn) buyBuff(btn.dataset.buff);
+  });
+  $('goalList').addEventListener('click', function (e) {
+    const btn = e.target.closest('button[data-goal]');
+    if (btn) claimGoal(btn.dataset.goal);
+  });
 
   $('saveBtn').addEventListener('click', function () { save(); toast(t().toastSave); });
 
