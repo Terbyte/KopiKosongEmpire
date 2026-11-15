@@ -90,25 +90,35 @@ const BUILDINGS = [
 ];
 
 const ACHIEVEMENTS = [
-  { id: 'first_click', en: 'First Brew',           bm: 'Bancuhan Pertama',      ok: s => s.clicks >= 1,      p: s => [s.clicks, 1] },
-  { id: 'click_100',   en: '100 Brews',            bm: '100 Bancuhan',          ok: s => s.clicks >= 100,    p: s => [s.clicks, 100] },
-  { id: 'click_1000',  en: '1,000 Brews',          bm: '1,000 Bancuhan',        ok: s => s.clicks >= 1000,   p: s => [s.clicks, 1000] },
-  { id: 'b_cerek',     en: 'First Kettle',         bm: 'Cerek Pertama',         ok: s => s.counts.cerek >= 1,  p: s => [s.counts.cerek, 1] },
-  { id: 'b_cerek_50',  en: '50 Kettles',           bm: '50 Cerek',              ok: s => s.counts.cerek >= 50, p: s => [s.counts.cerek, 50] },
-  { id: 'b_tapis',     en: 'Cloth Filter',         bm: 'Tapis Kopi',            ok: s => s.counts.tapis >= 1,  p: s => [s.counts.tapis, 1] },
-  { id: 'b_mesin',     en: 'Coffee Machine',       bm: 'Mesin Kopi',            ok: s => s.counts.mesin >= 1,  p: s => [s.counts.mesin, 1] },
-  { id: 'b_roti',      en: 'Roti Canai Griddle',   bm: 'Dapur Roti Canai',      ok: s => s.counts.roti >= 1,   p: s => [s.counts.roti, 1] },
-  { id: 'b_tetap',     en: 'Loyal Regulars',       bm: 'Pelanggan Tetap',       ok: s => s.counts.tetap >= 1,  p: s => [s.counts.tetap, 1] },
-  { id: 'b_rider',     en: 'Delivery Rider',       bm: 'Rider Penghantaran',    ok: s => s.counts.rider >= 1,  p: s => [s.counts.rider, 1] },
-  { id: 'b_cawangan',  en: 'Branch Outlet',        bm: 'Cawangan Kedua',        ok: s => s.counts.cawangan >= 1, p: s => [s.counts.cawangan, 1] },
-  { id: 'b_francais',  en: 'National Franchise',   bm: 'Francais Kebangsaan',   ok: s => s.counts.francais >= 1, p: s => [s.counts.francais, 1] },
-  { id: 'earn_1k',     en: 'RM 1,000 Earned',      bm: 'RM 1,000 Diperoleh',    ok: s => s.lifetime.e >= 3,  p: s => [Math.min(val(s.lifetime), 1000), 1000] },
-  { id: 'earn_1m',     en: 'RM 1,000,000',         bm: 'RM 1 Juta',             ok: s => s.lifetime.e >= 6,  p: s => [Math.min(val(s.lifetime), 1000000), 1000000] },
-  { id: 'p1_first',    en: 'First Balik Kampung',  bm: 'Balik Kampung Pertama', ok: s => s.prestiges >= 1,   p: s => [s.prestiges, 1] },
-  { id: 'p1_five',     en: '5x Balik Kampung',     bm: '5x Balik Kampung',      ok: s => s.prestiges >= 5,   p: s => [s.prestiges, 5] },
-  { id: 'all_types',   en: 'Full Menu',            bm: 'Menu Penuh',            ok: s => BUILDINGS.every(b => s.counts[b.id] >= 1), p: s => [BUILDINGS.filter(b => s.counts[b.id] >= 1).length, BUILDINGS.length] },
-  { id: 'tokens_100',  en: '100 Warung Tokens',    bm: '100 Warung Token',      ok: s => s.tokens >= 100,    p: s => [s.tokens, 100] },
-  { id: 'star_1',      en: 'First Franchise Star', bm: 'Bintang Francais',      ok: s => s.bintang >= 1,     p: s => [s.bintang, 1] },
+  // ---- brew ladder (hardcore) ----
+  { id: 'click_1',     en: 'First Brew',           bm: 'Bancuhan Pertama',      w: 1,    ok: s => s.clicks >= 1,      p: s => [s.clicks, 1] },
+  { id: 'click_100',   en: '100 Brews',            bm: '100 Bancuhan',          w: 1,    ok: s => s.clicks >= 100,    p: s => [s.clicks, 100] },
+  { id: 'click_250',   en: '250 Brews',            bm: '250 Bancuhan',          w: 1,    ok: s => s.clicks >= 250,    p: s => [s.clicks, 250] },
+  { id: 'click_600',   en: '600 Brews',            bm: '600 Bancuhan',          w: 1,    ok: s => s.clicks >= 600,    p: s => [s.clicks, 600] },
+  { id: 'click_1000',  en: '1,000 Brews',          bm: '1,000 Bancuhan',        w: 0.5,  ok: s => s.clicks >= 1000,   p: s => [s.clicks, 1000] },
+  { id: 'click_2000',  en: '2,000 Brews',          bm: '2,000 Bancuhan',        w: 0.5,  ok: s => s.clicks >= 2000,   p: s => [s.clicks, 2000] },
+  { id: 'click_5000',  en: '5,000 Brews',          bm: '5,000 Bancuhan',        w: 0.25, ok: s => s.clicks >= 5000,   p: s => [s.clicks, 5000] },
+  { id: 'click_10000', en: '10,000 Brews',         bm: '10,000 Bancuhan',       w: 0.25, ok: s => s.clicks >= 10000,  p: s => [s.clicks, 10000] },
+
+  // ---- equipment ----
+  { id: 'b_cerek',     en: 'First Kettle',         bm: 'Cerek Pertama',         w: 1,    ok: s => s.counts.cerek >= 1,  p: s => [s.counts.cerek, 1] },
+  { id: 'b_cerek_50',  en: '50 Kettles',           bm: '50 Cerek',              w: 0.5,  ok: s => s.counts.cerek >= 50, p: s => [s.counts.cerek, 50] },
+  { id: 'b_tapis',     en: 'Cloth Filter',         bm: 'Tapis Kopi',            w: 1,    ok: s => s.counts.tapis >= 1,  p: s => [s.counts.tapis, 1] },
+  { id: 'b_mesin',     en: 'Coffee Machine',       bm: 'Mesin Kopi',            w: 1,    ok: s => s.counts.mesin >= 1,  p: s => [s.counts.mesin, 1] },
+  { id: 'b_roti',      en: 'Roti Canai Griddle',   bm: 'Dapur Roti Canai',      w: 1,    ok: s => s.counts.roti >= 1,   p: s => [s.counts.roti, 1] },
+  { id: 'b_tetap',     en: 'Loyal Regulars',       bm: 'Pelanggan Tetap',       w: 1,    ok: s => s.counts.tetap >= 1,  p: s => [s.counts.tetap, 1] },
+  { id: 'b_rider',     en: 'Delivery Rider',       bm: 'Rider Penghantaran',    w: 1,    ok: s => s.counts.rider >= 1,  p: s => [s.counts.rider, 1] },
+  { id: 'b_cawangan',  en: 'Branch Outlet',        bm: 'Cawangan Kedua',        w: 0.5,  ok: s => s.counts.cawangan >= 1, p: s => [s.counts.cawangan, 1] },
+  { id: 'b_francais',  en: 'National Franchise',   bm: 'Francais Kebangsaan',   w: 0.5,  ok: s => s.counts.francais >= 1, p: s => [s.counts.francais, 1] },
+
+  // ---- money & prestige ----
+  { id: 'earn_1k',     en: 'RM 1,000 Earned',      bm: 'RM 1,000 Diperoleh',    w: 0.5,  ok: s => s.lifetime.e >= 3,  p: s => [Math.min(val(s.lifetime), 1000), 1000] },
+  { id: 'earn_1m',     en: 'RM 1,000,000',         bm: 'RM 1 Juta',             w: 0.5,  ok: s => s.lifetime.e >= 6,  p: s => [Math.min(val(s.lifetime), 1000000), 1000000] },
+  { id: 'p1_first',    en: 'First Balik Kampung',  bm: 'Balik Kampung Pertama', w: 0.5,  ok: s => s.prestiges >= 1,   p: s => [s.prestiges, 1] },
+  { id: 'p1_five',     en: '5x Balik Kampung',     bm: '5x Balik Kampung',      w: 0.25, ok: s => s.prestiges >= 5,   p: s => [s.prestiges, 5] },
+  { id: 'all_types',   en: 'Full Menu',            bm: 'Menu Penuh',            w: 0.5,  ok: s => BUILDINGS.every(b => s.counts[b.id] >= 1), p: s => [BUILDINGS.filter(b => s.counts[b.id] >= 1).length, BUILDINGS.length] },
+  { id: 'tokens_100',  en: '100 Warung Tokens',    bm: '100 Warung Token',      w: 0.25, ok: s => s.tokens >= 100,    p: s => [s.tokens, 100] },
+  { id: 'star_1',      en: 'First Franchise Star', bm: 'Bintang Francais',      w: 0.25, ok: s => s.bintang >= 1,     p: s => [s.bintang, 1] },
 ];
 
 /* ---------------- i18n ---------------- */
@@ -180,7 +190,7 @@ const T = {
 };
 
 /* ---------------- state ---------------- */
-const VERSION = '2026.11.15-8';
+const VERSION = '2026.11.15-9';
 const SAVE_KEY = 'kopitiam-kosong-v2';
 const OLD_KEY = 'kopitiam-kosong-v1';
 
@@ -208,8 +218,13 @@ const t = () => T[S.lang] || T.en;
 
 /* ---------------- derived ---------------- */
 function achCount() { return ACHIEVEMENTS.filter(a => S.ach[a.id]).length; }
+function achBonus() {
+  let b = 0;
+  for (const a of ACHIEVEMENTS) if (S.ach[a.id]) b += (a.w || 1);
+  return b;
+}
 function mult() {
-  return (1 + S.tokens * 0.1) * (1 + S.bintang * 0.5) * (1 + achCount() * 0.01);
+  return (1 + S.tokens * 0.1) * (1 + S.bintang * 0.5) * (1 + achBonus() / 100);
 }
 function clickPower() { return fromNum((CLICK_BASE + S.clicks * 0.0005) * mult()); }
 function cps() {
@@ -444,7 +459,10 @@ function doP2() {
 let achQ = [], achUp = false;
 
 function sparks() {
-  const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
+  const card = document.querySelector('.achpop-card');
+  const r = card ? card.getBoundingClientRect() : null;
+  const cx = r ? r.x + r.width / 2 : window.innerWidth / 2;
+  const cy = r ? r.y + r.height / 2 : 90;
   for (let i = 0; i < 16; i++) {
     const sp = document.createElement('div');
     sp.className = 'spark';
@@ -471,7 +489,7 @@ function nextAch() {
   const pop = $('achPop');
   $('achKicker').textContent = t().achKicker;
   $('achPopTitle').textContent = (S.lang === 'bm' ? a.bm : a.en);
-  $('achPopSub').textContent = t().achSub;
+  $('achPopSub').textContent = '+' + (a.w || 1) + '% ' + (S.lang === 'bm' ? 'pendapatan, kekal' : 'earnings, permanently');
   pop.classList.add('show');
   sfxAch();
   sparks();
@@ -584,7 +602,7 @@ function renderAch() {
     const done = !!S.ach[a.id];
     return '<div class="ach ' + (done ? 'done' : '') + '">' +
       '<div class="t">' + (S.lang === 'bm' ? a.bm : a.en) + '</div>' +
-      '<div class="d">+1% ' + (S.lang === 'bm' ? 'pendapatan' : 'earnings') + '</div>' +
+      '<div class="d">+' + (a.w || 1) + '% ' + (S.lang === 'bm' ? 'pendapatan' : 'earnings') + '</div>' +
       '<div class="st">' + (done ? '✓ ' + t().achDone : t().achNot) + '</div>' +
     '</div>';
   }).join('');
@@ -608,7 +626,7 @@ function renderStats() {
     [t().sTokens, S.tokens.toLocaleString('en-MY')],
     [t().sStars, S.bintang.toLocaleString('en-MY')],
     [t().sMult, 'x' + mult().toFixed(2)],
-    [t().sAch, achCount() + '/' + ACHIEVEMENTS.length + ' (+' + achCount() + '%)'],
+    [t().sAch, achCount() + '/' + ACHIEVEMENTS.length + ' (+' + achBonus().toFixed(2).replace('.00','') + '%)'],
     [t().sBuildings, BUILDINGS.reduce(function (n, b) { return n + (S.counts[b.id] || 0); }, 0).toLocaleString('en-MY')],
     [t().sPrestiges, String(S.prestiges)],
     [t().sClicks, S.clicks.toLocaleString('en-MY')],

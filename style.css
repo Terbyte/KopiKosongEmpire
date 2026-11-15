@@ -624,8 +624,10 @@ footer {
 .achpop {
   position: fixed;
   inset: 0;
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: clamp(10px, 5vh, 54px) 12px 0;
   pointer-events: none;
   z-index: 60;
   opacity: 0;
@@ -649,11 +651,11 @@ footer {
     0 0 0 1px rgba(240,180,41,.30),
     0 24px 70px rgba(0,0,0,.8),
     0 0 90px rgba(240,180,41,.30);
-  transform: scale(.82) translateY(16px);
+  transform: translateY(-26px) scale(.94);
   transition: transform .42s cubic-bezier(.18,1.5,.4,1);
   overflow: hidden;
 }
-.achpop.show .achpop-card { transform: scale(1) translateY(0); }
+.achpop.show .achpop-card { transform: translateY(0) scale(1); }
 
 .achpop-ring {
   position: absolute;
