@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Kopi Kosong Empire — Kopitiam Idle Game</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="rain" aria-hidden="true">
+  <span></span><span></span><span></span><span></span><span></span><span></span>
+  <span></span><span></span><span></span><span></span><span></span><span></span>
+</div>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="sign">KOPI KOSONG<span>EMPIRE</span></div>
+    <div class="tagline" id="tagline">Small warung, big dreams 🇲🇾</div>
+  </div>
+
+  <div class="wallet">
+    <div class="money" id="money">RM 0.00</div>
+    <div class="rate"><span id="cps">0.00</span> <span id="rateUnit">RM / sec</span></div>
+  </div>
+
+  <div class="topbtns">
+    <button id="langBtn" class="chip" title="Language / Bahasa">EN</button>
+    <button id="soundBtn" class="chip" title="Sound">🔊</button>
+  </div>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button data-tab="shop" class="active" id="tabShop">Shop</button>
+  <button data-tab="achievements" id="tabAch">Achievements <span class="badge" id="achBadge">0</span></button>
+  <button data-tab="stats" id="tabStats">Stats</button>
+  <button data-tab="settings" id="tabSet">Settings</button>
+</nav>
+
+<main>
+  <section class="panel active" id="panel-shop">
+    <div class="counter">
+      <button id="brewBtn" class="brew" aria-label="Brew coffee">
+        <svg viewBox="0 0 120 120" class="cup" aria-hidden="true">
+          <ellipse cx="60" cy="98" rx="34" ry="7" class="saucer"/>
+          <path d="M28 44 h56 v26 a28 22 0 0 1 -56 0 z" class="body"/>
+          <path d="M84 50 h8 a12 12 0 0 1 0 24 h-8" class="handle"/>
+          <ellipse cx="56" cy="44" rx="28" ry="8" class="liquid"/>
+          <path class="steam s1" d="M48 32 q6 -10 0 -18" />
+          <path class="steam s2" d="M62 34 q6 -11 0 -20" />
+        </svg>
+        <span class="brew-label" id="brewLabel">BREW KOPI</span>
+        <span class="brew-gain" id="clickGain">+ RM 0.05</span>
+      </button>
+
+      <div class="milestones">
+        <h3 id="noticeTitle">Notice Board</h3>
+        <ul id="milestones"></ul>
+      </div>
+    </div>
+
+    <div class="shop">
+      <div class="shop-head">
+        <h2 id="shopTitle">Equipment &amp; Outlets</h2>
+        <div class="buymode" id="buymode">
+          <button data-n="1" class="active">×1</button>
+          <button data-n="5">×5</button>
+          <button data-n="10">×10</button>
+          <button data-n="100">×100</button>
+          <button data-n="max">MAX</button>
+        </div>
+      </div>
+      <div id="shopList" class="shop-list"></div>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-achievements">
+    <div class="card">
+      <h2 id="achTitle">Achievements</h2>
+      <p class="muted" id="achSub">Each achievement gives a permanent +1% to all earnings.</p>
+      <div id="achList" class="ach-list"></div>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-stats">
+    <div class="card">
+      <h2 id="statsTitle">Statistics</h2>
+      <div class="statgrid" id="statGrid"></div>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-settings">
+    <div class="card">
+      <h2 id="setTitle">Settings</h2>
+
+      <div class="row">
+        <div>
+          <div class="row-title" id="langTitle">Language</div>
+          <div class="muted" id="langSub">English is the default. Bahasa Melayu available.</div>
+        </div>
+        <div class="seg" id="langSeg">
+          <button data-lang="en" class="active">English</button>
+          <button data-lang="bm">Bahasa Melayu</button>
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <div class="row-title" id="soundTitle">Sound</div>
+          <div class="muted" id="soundSub">Synthesised kopitiam sounds, no audio files.</div>
+        </div>
+        <button id="soundToggle" class="switch on">ON</button>
+      </div>
+
+      <div class="row">
+        <div>
+          <div class="row-title" id="saveTitle">Save &amp; backup</div>
+          <div class="muted" id="saveSub">Auto-saves every 5 seconds in this browser.</div>
+        </div>
+        <div class="btnrow">
+          <button id="saveBtn" class="btn">Save</button>
+          <button id="exportBtn" class="btn">Export</button>
+          <button id="importBtn" class="btn">Import</button>
+        </div>
+      </div>
+
+      <div class="row danger-row">
+        <div>
+          <div class="row-title" id="resetTitle">Reset everything</div>
+          <div class="muted" id="resetSub">Wipes all progress including prestige layers.</div>
+        </div>
+        <button id="resetBtn" class="btn danger">Reset</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="prestige">
+    <div class="prestige-info">
+      <strong id="p1Title">Balik Kampung</strong>
+      <span id="prestigeInfo">Collect RM 10.00M lifetime to unlock.</span>
+    </div>
+    <button id="prestigeBtn" disabled>Balik Kampung</button>
+  </div>
+
+  <div class="prestige p2">
+    <div class="prestige-info">
+      <strong id="p2Title">Franchise Expansion</strong>
+      <span id="prestige2Info">Reach 100 Warung Tokens to unlock.</span>
+    </div>
+    <button id="prestige2Btn" disabled>Expand Franchise</button>
+  </div>
+</footer>
+
+<div id="toast" class="toast"></div>
+
+<script src="game.js"></script>
+</body>
+</html>
