@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
 <title>Kopi Kosong Empire — Kopitiam Idle Game</title>
-<link rel="stylesheet" href="style.css?v=2026.11.16-7" />
+<link rel="stylesheet" href="style.css?v=2026.11.16-8" />
 </head>
 <body>
 
@@ -22,6 +22,11 @@
   <div class="wallet">
     <div class="money" id="money">RM 0.00</div>
     <div class="rate"><span id="cps">0.00</span> <span id="rateUnit">RM / sec</span></div>
+    <div class="curbar" id="curBar">
+      <span class="cur" id="curBeans" title="Biji Kopi">🫘 <b>0</b></span>
+      <span class="cur hide" id="curTokens" title="Warung Tokens">🏷️ <b>0</b></span>
+      <span class="cur hide" id="curStars" title="Franchise Stars">⭐ <b>0</b></span>
+    </div>
   </div>
 
   <div class="topbtns">
@@ -119,7 +124,7 @@
       <h2 id="buffTitle">Mystic Buffs</h2>
       <p class="muted" id="buffSub">The kedai is watched over by old spirits. Spend Biji Kopi on permanent blessings.</p>
       <div class="beanbar">
-        <span id="beanLabel">Biji Kopi</span> <b id="beanCount">0</b>
+        <span id="beanLabel">Biji Kopi</span>
         <button class="hintq" id="beanHelp" aria-label="How to earn Biji Kopi">?</button>
         <div class="hintpop" id="beanPop" role="tooltip">
           <b>How to earn Biji Kopi</b>
@@ -146,6 +151,8 @@
     <div class="card">
       <h2 id="statsTitle">Statistics</h2>
       <div class="statgrid" id="statGrid"></div>
+      <h3 class="subhead" id="buffHead">Permanent buffs</h3>
+      <div id="buffStatus" class="buffstatus"></div>
     </div>
   </section>
 
@@ -271,6 +278,6 @@
 
 <div id="toast" class="toast"></div>
 
-<script src="game.js?v=2026.11.16-7"></script>
+<script src="game.js?v=2026.11.16-8"></script>
 </body>
 </html>

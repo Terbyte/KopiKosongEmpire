@@ -196,7 +196,7 @@ const T = {
     p1: 'Balik Kampung', p2: 'Franchise Expansion',
     p1Locked: 'Earn RM 1.00M lifetime to unlock.',
     p2Locked: 'Reach 100 Warung Tokens to unlock.',
-    p1Ready: (g, tk) => 'Convert to ' + g + ' Warung Token (+' + (g * 10).toFixed(0) + '% earnings). You have ' + tk + '.',
+    p1Ready: (g) => 'Convert to ' + g + ' Warung Token (+' + (g * 10).toFixed(0) + '% earnings).',
     p2Ready: (g) => 'Spend all Warung Tokens for ' + g + ' Franchise Star (+50% each, forever).',
     p1Btn: 'Balik Kampung', p2Btn: 'Expand Franchise',
     confirm1: (g) => 'Balik Kampung?\n\nAll cash and equipment reset. You gain ' + g + ' Warung Token (+' + (g * 10) + '% forever).',
@@ -228,7 +228,7 @@ const T = {
     p1: 'Balik Kampung', p2: 'Buka Francais',
     p1Locked: 'Kumpul RM 1.00J seumur hidup untuk buka.',
     p2Locked: 'Dapatkan 100 Warung Token untuk buka.',
-    p1Ready: (g, tk) => 'Tukar kepada ' + g + ' Warung Token (+' + (g * 10).toFixed(0) + '% pendapatan). Anda ada ' + tk + '.',
+    p1Ready: (g) => 'Tukar kepada ' + g + ' Warung Token (+' + (g * 10).toFixed(0) + '% pendapatan).',
     p2Ready: (g) => 'Guna semua Warung Token untuk ' + g + ' Bintang Francais (+50% setiap satu, kekal).',
     p1Btn: 'Balik Kampung', p2Btn: 'Buka Francais',
     confirm1: (g) => 'Balik kampung?\n\nSemua tunai dan peralatan direset. Anda dapat ' + g + ' Warung Token (+' + (g * 10) + '% kekal).',
@@ -243,7 +243,7 @@ const T = {
 };
 
 /* ---------------- state ---------------- */
-const VERSION = '2026.11.16-7';
+const VERSION = '2026.11.16-8';
 const SAVE_KEY = 'kopitiam-kosong-v2';
 const OLD_KEY = 'kopitiam-kosong-v1';
 
@@ -260,6 +260,7 @@ let S = {
   boostUntil: 0,
   boostMult: 1,
   adsToday: 0,
+  brewBeans: 0,
   adsDate: '',
   purchases: [],
   goals: {},
@@ -580,7 +581,6 @@ function checkAchievements() {
   for (const a of ACHIEVEMENTS) {
     if (!S.ach[a.id] && a.ok(S)) {
       S.ach[a.id] = true;
-      S.beans += 1;
       queueAch(a);
     }
   }
@@ -711,6 +711,7 @@ function load() {
     S.boostMult = d.boostMult || 1;
     S.adsToday = d.adsToday | 0;
     S.adsDate = d.adsDate || '';
+    S.brewBeans = d.brewBeans | 0;
     S.purchases = d.purchases || [];
     S.startedAt = d.startedAt || Date.now();
     S.counts = Object.assign({}, d.counts);
@@ -832,7 +833,8 @@ function renderBuffs() {
       ? 'Anda ada <b>' + S.beans + '</b> biji. Buka pencapaian untuk +1 setiap satu (' + nextAch + ' lagi tinggal), atau tuntut matlamat untuk +2 hingga +8.'
       : 'You have <b>' + S.beans + '</b> beans. Unlock achievements for <b>+1</b> each (' + nextAch + ' left), or claim goals for <b>+2 to +8</b>.';
   }
-  $('beanCount').textContent = S.beans;
+  const bc = $('beanCount');
+  if (bc) bc.textContent = S.beans;
   const bb = $('beanBadge');
   if (bb) bb.textContent = S.beans;
 
@@ -948,6 +950,16 @@ function renderStats() {
     [t().sClicks, S.clicks.toLocaleString('en-MY')],
     [t().sPlaytime, playtime()],
   ];
+  const bs = $('buffStatus');
+  if (bs) {
+    bs.innerHTML = BUFFS.map(function (b) {
+      const lvl = buffLevel(b.id);
+      return '<div class="bsrow ' + (lvl > 0 ? 'active' : 'off') + '">' +
+        '<span class="n">' + b.icon + ' ' + (S.lang === 'bm' ? b.bm : b.en) + '</span>' +
+        '<span class="v">' + (lvl > 0 ? 'L' + lvl : '—') + '</span></div>';
+    }).join('');
+  }
+
   $('statGrid').innerHTML = rows.map(function (r) {
     return '<div class="stat"><div class="k">' + r[0] + '</div><div class="v">' + r[1] + '</div></div>';
   }).join('');
@@ -955,19 +967,15 @@ function renderStats() {
 
 function renderPrestige() {
   const g1 = p1Gain();
-  $('prestigeInfo').textContent = g1 > 0
-    ? t().p1Ready(g1, S.tokens)
-    : t().p1Locked + ' (' + t().sTokens + ': ' + S.tokens + ')';
+  $('prestigeInfo').textContent = g1 > 0 ? t().p1Ready(g1) : t().p1Locked;
   $('prestigeBtn').disabled = g1 <= 0;
   const ready = g1 > 0 && (S.lifetime.e >= 6.7 || g1 >= S.tokens + 3);
   $('prestigeBtn').classList.toggle('ready', ready);
-  if (ready) $('prestigeInfo').textContent = (S.lang === 'bm' ? '\u2b50 Masa sesuai untuk balik kampung! ' : '\u2b50 Good time to reset! ') + t().p1Ready(g1, S.tokens);
+  if (ready) $('prestigeInfo').textContent = (S.lang === 'bm' ? '\u2b50 Masa sesuai! ' : '\u2b50 Good time to reset! ') + t().p1Ready(g1);
   $('prestigeBtn').textContent = g1 > 0 ? t().p1Btn + ' (+' + g1 + ')' : t().p1Btn;
 
   const g2 = p2Gain();
-  $('prestige2Info').textContent = g2 > 0
-    ? t().p2Ready(g2)
-    : t().p2Locked + ' (' + t().sTokens + ': ' + S.tokens + ')';
+  $('prestige2Info').textContent = g2 > 0 ? t().p2Ready(g2) : t().p2Locked;
   $('prestige2Btn').disabled = g2 <= 0;
   $('prestige2Btn').textContent = g2 > 0 ? t().p2Btn + ' (+' + g2 + ')' : t().p2Btn;
 }
@@ -1040,6 +1048,16 @@ function updateRing() {
 
 function render() {
   $('money').textContent = fmtRM(S.money);
+  const cb = $('curBeans'), ct = $('curTokens'), cs = $('curStars');
+  if (cb) cb.innerHTML = '🫘 <b>' + S.beans + '</b>';
+  if (ct) {
+    ct.classList.toggle('hide', !(S.tokens > 0 || S.prestiges > 0));
+    ct.innerHTML = '🏷️ <b>' + S.tokens + '</b>';
+  }
+  if (cs) {
+    cs.classList.toggle('hide', !(S.bintang > 0));
+    cs.innerHTML = '⭐ <b>' + S.bintang + '</b>';
+  }
   updateRing();
   $('cps').textContent = fmt(cps());
   $('clickGain').textContent = '+ ' + fmtRM(clickPower());
@@ -1115,6 +1133,14 @@ function loop(now) {
     S.money = add(S.money, gain);
     S.lifetime = add(S.lifetime, gain);
   }
+  const brewStep = Math.floor(S.clicks / 1000);
+  if (brewStep > (S.brewBeans || 0)) {
+    const gained = brewStep - (S.brewBeans || 0);
+    S.beans += gained;
+    S.brewBeans = brewStep;
+    toast('+' + gained + ' 🫘 ' + (S.lang === 'bm' ? 'setiap 1,000 bancuhan' : 'per 1,000 brews'));
+  }
+
   saveTimer += dt;
   if (saveTimer > 5) { saveTimer = 0; save(); checkAchievements(); }
   render();
