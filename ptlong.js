@@ -83,13 +83,15 @@ const MAX_CYCLES = 40;
     if (hadModal) { await p.click('#claimOffline'); await p.waitForTimeout(400); }
 
     // a real player prestiges whenever it is available
+    // follow the game's own advice: reset only when it says it is a good time
     const canPrestige = await p.evaluate(() => {
       const btn = document.querySelector('#prestigeBtn');
-      return btn && !btn.disabled;
+      return btn && !btn.disabled && btn.classList.contains('ready');
     });
     if (canPrestige) {
-      await p.click('#prestigeBtn');
-      await p.waitForTimeout(700);
+      // pulsing 'ready' animation makes Playwright refuse a real click
+      await p.evaluate(() => { document.querySelector('#prestigeBtn').click(); });
+      await p.waitForTimeout(900);
       await buyBest();
     }
 

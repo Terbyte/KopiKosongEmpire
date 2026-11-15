@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
 <title>Kopi Kosong Empire — Kopitiam Idle Game</title>
-<link rel="stylesheet" href="style.css?v=2026.11.16-19" />
+<link rel="stylesheet" href="style.css?v=2026.11.16-20" />
 </head>
 <body>
 
@@ -47,6 +47,7 @@
 
 <main>
   <section class="panel active" id="panel-brew">
+    <div class="empayar" id="empayarChip"></div>
     <div class="counter">
       <button id="brewBtn" class="brew" aria-label="Brew coffee">
         <svg class="ring" viewBox="0 0 240 240" aria-hidden="true">
@@ -284,8 +285,22 @@
   </div>
 </div>
 
+<div class="endwrap" id="endWrap">
+  <div class="endcard">
+    <div class="endkicker" id="endKicker">TAMAT</div>
+    <h2 class="endtitle" id="endTitle">Kopi Kosong Empire</h2>
+    <p class="endsub" id="endSub"></p>
+    <div class="endstats" id="endStats"></div>
+    <div class="endthanks" id="endThanks"></div>
+    <div class="endcredits" id="endCredits"></div>
+    <div class="endbtns">
+      <button id="endContinue">Continue — Empayar Mode</button>
+    </div>
+    <div class="endfoot" id="endFoot"></div>
+  </div>
+</div>
 <div id="toast" class="toast"></div>
 
-<script src="game.js?v=2026.11.16-19"></script>
+<script src="game.js?v=2026.11.16-20"></script>
 </body>
 </html>

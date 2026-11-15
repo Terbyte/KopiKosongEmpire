@@ -270,7 +270,7 @@ const T = {
 };
 
 /* ---------------- state ---------------- */
-const VERSION = '2026.11.16-19';
+const VERSION = '2026.11.16-20';
 const SAVE_KEY = 'kopitiam-kosong-v2';
 const OLD_KEY = 'kopitiam-kosong-v1';
 
@@ -295,6 +295,9 @@ let S = {
   soundOn: true,
   lang: 'en',
   startedAt: Date.now(),
+   finished: false,
+  allEarned: { m: 0, e: 0 },
+  finishedAt: 0,
   lastSeen: Date.now(),
   counts: {},
 };
@@ -518,6 +521,7 @@ function brew(ev) {
   const g = clickPower();
   S.money = add(S.money, g);
   S.lifetime = add(S.lifetime, g);
+  S.allEarned = add(S.allEarned, g);
   S.clicks++;
   SFX.brew();
   if (ev) floaty(ev.clientX, ev.clientY, '+' + fmtRM(g));
@@ -633,6 +637,7 @@ function claimOffline() {
   if (!pendingOffline) return;
   S.money = add(S.money, pendingOffline.gain);
   S.lifetime = add(S.lifetime, pendingOffline.gain);
+  S.allEarned = add(S.allEarned, pendingOffline.gain);
   toast('+' + fmtRM(pendingOffline.gain));
   pendingOffline = null;
   $('offlineModal').classList.remove('show');
@@ -746,6 +751,9 @@ function load() {
     S.brewBeans = d.brewBeans | 0;
     S.purchases = d.purchases || [];
     S.startedAt = d.startedAt || Date.now();
+    S.finished = !!d.finished;
+    S.allEarned = d.allEarned || { m: 0, e: 0 };
+    S.finishedAt = d.finishedAt || 0;
     S.counts = Object.assign({}, d.counts);
     BUILDINGS.forEach(b => { S.counts[b.id] = S.counts[b.id] | 0; });
 
@@ -823,6 +831,90 @@ let achSig = '';
 function achSignature() {
   return S.lang + '|' + ACHIEVEMENTS.map(function (a) { return S.ach[a.id] ? '1' : '0'; }).join('');
 }
+const END_TXT = {
+  en: {
+    kicker: 'TAMAT',
+    title: 'Kopi Kosong Empire',
+    sub: 'You started with one cup and a ring that would not fill. Now your kopitiam stands in every state.',
+    brews: 'cups brewed', earned: 'earned all-time', prestiges: 'balik kampung', ach: 'achievements',
+    beans: 'biji kopi', franchises: 'franchises', played: 'time played',
+    thanks: 'Thank you for playing. Every tap you gave this little shop kept the lights on — <em>terima kasih kerana menyokong kedai kecil ini.</em> If you made it this far, you are the reason it stayed open.',
+    role1: 'CREATED BY', who1: 'Imran Afiffuddin',
+    role2: 'BUILT WITH', who2: 'Hermes Agent',
+    foot: 'Kopi Kosong Empire · Malaysia · 2026',
+    cont: 'Continue — Empayar Mode',
+    empayar: 'EMPAYAR', empTxt: 'franchises to a true empire',
+    done: 'Empayar complete — 100 franchises. There is nothing left to build. Terima kasih.'
+  },
+  bm: {
+    kicker: 'TAMAT',
+    title: 'Kopi Kosong Empire',
+    sub: 'Anda mula dengan satu cawan dan bulatan yang sukar penuh. Kini kedai anda berdiri di setiap negeri.',
+    brews: 'cawan dibancuh', earned: 'jumlah pendapatan', prestiges: 'balik kampung', ach: 'pencapaian',
+    beans: 'biji kopi', franchises: 'francais', played: 'masa bermain',
+    thanks: 'Terima kasih kerana bermain. Setiap ketukan anda menghidupkan kedai kecil ini — <em>thank you for staying until the last cup.</em> Kalau anda sampai sejauh ini, andalah sebab kedai ini masih buka.',
+    role1: 'DICIPTA OLEH', who1: 'Imran Afiffuddin',
+    role2: 'DIBINA DENGAN', who2: 'Hermes Agent',
+    foot: 'Kopi Kosong Empire · Malaysia · 2026',
+    cont: 'Teruskan — Mod Empayar',
+    empayar: 'EMPAYAR', empTxt: 'francais menuju empayar sebenar',
+    done: 'Empayar lengkap — 100 francais. Tiada lagi untuk dibina. Terima kasih.'
+  }
+};
+
+function playtime() {
+  let s = Math.floor((Date.now() - (S.startedAt || Date.now())) / 1000);
+  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60);
+  return h > 0 ? h + 'h ' + m + 'm' : m + 'm';
+}
+
+function checkFinish() {
+  if (!S.finished && (S.counts.francais || 0) >= 1) {
+    S.finished = true;
+    S.finishedAt = Date.now();
+    showEnding();
+  }
+}
+
+function showEnding() {
+  const x = END_TXT[S.lang] || END_TXT.en;
+  const wrap = $('endWrap');
+  if (!wrap) return;
+  $('endKicker').textContent = x.kicker;
+  $('endTitle').textContent = x.title;
+  $('endSub').textContent = x.sub;
+  const rows = [
+    [S.clicks.toLocaleString('en-MY'), x.brews],
+    [fmtRM(S.allEarned), x.earned],
+    [S.prestiges, x.prestiges],
+    [achCount() + ' / ' + ACHIEVEMENTS.length, x.ach],
+    [S.beans, x.beans],
+    [(S.counts.francais || 0) + (S.counts.francais === 1 && S.lang === 'en' ? '' : ''), x.franchises],
+    [playtime(), x.played],
+    [(S.counts.cerek || 0) + ' ' + (S.lang === 'bm' ? 'cerek' : 'kettles'), S.lang === 'bm' ? 'modal pertama' : 'first asset']
+  ];
+  $('endStats').innerHTML = rows.map(r =>
+    '<div class="endstat"><b>' + r[0] + '</b><span>' + r[1] + '</span></div>').join('');
+  $('endThanks').innerHTML = x.thanks;
+  $('endCredits').innerHTML =
+    '<span class="role">' + x.role1 + '</span><span class="who">' + x.who1 + '</span>' +
+    '<span class="role" style="margin-top:8px">' + x.role2 + '</span><span class="who">' + x.who2 + '</span>';
+  $('endFoot').textContent = x.foot;
+  $('endContinue').textContent = x.cont;
+  wrap.classList.add('show');
+  if (typeof SFX !== 'undefined' && SFX.brew) { try { SFX.brew(); } catch (e) {} }
+}
+
+function renderEmpayar() {
+  const chip = $('empayarChip');
+  if (!chip) return;
+  const x = END_TXT[S.lang] || END_TXT.en;
+  if (!S.finished) { chip.classList.remove('show'); return; }
+  const n = S.counts.francais || 0;
+  chip.classList.add('show');
+  chip.textContent = '🏆 ' + x.empayar + ' · ' + Math.min(n, 100) + ' / 100 ' + x.empTxt;
+}
+
 function updateMissionBadge() {
   const el = $('tabMission');
   if (!el) return;
@@ -845,6 +937,14 @@ function missionSlots() {
 
 function activeGoals() {
   return GOALS.filter(function (g) { return !S.goals[g.id]; }).slice(0, missionSlots());
+}
+
+function bindEnding() {
+  const btn = $('endContinue');
+  if (btn) btn.addEventListener('click', function () {
+    $('endWrap').classList.remove('show');
+    save();
+  });
 }
 
 function buyBuff(id) {
@@ -1180,6 +1280,8 @@ function render() {
   renderNotices();
   updateAchBadge();
   updateMissionBadge();
+  renderEmpayar();
+  checkFinish();
   if ($('panel-achievements').classList.contains('active') && achSignature() !== achSig) renderAch();
   if ($('panel-buffs').classList.contains('active') && buffSignature() !== buffSig) renderBuffs();
   if ($('panel-mission').classList.contains('active') && missionSig() !== lastMissionSig) renderMissions();
@@ -1246,6 +1348,7 @@ function loop(now) {
   if (gain.m !== 0) {
     S.money = add(S.money, gain);
     S.lifetime = add(S.lifetime, gain);
+    S.allEarned = add(S.allEarned, gain);
   }
   const brewStep = Math.floor(S.clicks / 1000);
   if (brewStep > (S.brewBeans || 0)) {
@@ -1264,6 +1367,7 @@ function loop(now) {
 
 /* ---------------- wiring ---------------- */
 function init() {
+  bindEnding();
   const hadSave = load();
   applyLang();
 
