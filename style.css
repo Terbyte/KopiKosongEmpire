@@ -15,14 +15,23 @@
 
 * { box-sizing: border-box; }
 
-/* iOS: kill double-tap zoom, text selection and tap flash */
+/* iOS: kill double-tap zoom everywhere, text selection and tap flash */
+html, body {
+  touch-action: manipulation;               /* pan + pinch allowed, double-tap zoom off */
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: contain;
+  text-size-adjust: 100%;
+}
+body * { touch-action: manipulation; }       /* covers panels, cards, text, empty space */
 button, .brew, .tabs button, .buybtn, .chip, .switch, .btn, .seg button {
-  touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
   -webkit-user-select: none;
   user-select: none;
+  -webkit-touch-callout: none;
 }
-html, body { -webkit-text-size-adjust: 100%; }
+/* scroll containers must keep native scrolling */
+.tabs, .shop-list, .ach-list, .statgrid { touch-action: pan-x pan-y; }
 
 html, body {
   margin: 0;

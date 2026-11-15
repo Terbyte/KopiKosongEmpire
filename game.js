@@ -180,7 +180,7 @@ const T = {
 };
 
 /* ---------------- state ---------------- */
-const VERSION = '2026.11.15-6';
+const VERSION = '2026.11.15-7';
 const SAVE_KEY = 'kopitiam-kosong-v2';
 const OLD_KEY = 'kopitiam-kosong-v1';
 
@@ -809,6 +809,17 @@ function init() {
   $('soundToggle').classList.toggle('on', S.soundOn);
 
   window.addEventListener('beforeunload', function () { if (!hardReset) save(); });
+
+  // iOS double-tap zoom: swallow the gesture as a last line of defence
+  let lastTap = 0;
+  document.addEventListener('touchend', function (e) {
+    // never swallow taps on real controls - that would eat clicks
+    if (e.target.closest('button, a, input, select, textarea, .tabs, .shop-list')) { lastTap = 0; return; }
+    const now = Date.now();
+    if (now - lastTap < 320) e.preventDefault();
+    lastTap = now;
+  }, { passive: false });
+  document.addEventListener('dblclick', function (e) { e.preventDefault(); }, { passive: false });
   document.addEventListener('visibilitychange', function () { if (document.hidden) save(); });
 
   if (!hadSave) setTimeout(function () { toast(t().toastWelcome); }, 700);
