@@ -59,29 +59,29 @@ const COST_MULT = 1.15;
 const CLICK_BASE = 0.05;
 const OFFLINE_CAP_HOURS = 8;
 const OFFLINE_RATE = 0.5;
-const P1_UNLOCK = 1e7;
+const P1_UNLOCK = 1e6;
 const P2_UNLOCK_TOKENS = 100;
 
 const BUILDINGS = [
-  { id: 'cerek',    name: 'Cerek Air Panas',     nameEn: 'Kettle',           base: 0.25,    cps: 0.02,
+  { id: 'cerek',    name: 'Cerek Air Panas',     nameEn: 'Kettle',           base: 0.25,    cps: 0.05,
     en: 'Old aluminium kettle. Where every kopi begins.',
     bm: 'Cerek aluminium lama. Di sinilah setiap kopi bermula.' },
-  { id: 'tapis',    name: 'Tapis Kopi',          nameEn: 'Cloth Filter',     base: 1.5,     cps: 0.15,
+  { id: 'tapis',    name: 'Tapis Kopi',          nameEn: 'Cloth Filter',     base: 1.5,     cps: 0.40,
     en: 'Cloth filter. Makes the kopi thicker and stronger.',
     bm: 'Kain tapis. Buat kopi lebih kaw dan pekat.' },
-  { id: 'mesin',    name: 'Mesin Kopi Lama',     nameEn: 'Coffee Machine',   base: 18,      cps: 1.2,
+  { id: 'mesin',    name: 'Mesin Kopi Lama',     nameEn: 'Coffee Machine',   base: 18,      cps: 3.0,
     en: 'Loud motor, still great coffee.',
     bm: 'Motor bising, kopi tetap sedap.' },
   { id: 'roti',     name: 'Dapur Roti Canai',    nameEn: 'Roti Canai Griddle', base: 220,   cps: 8,
     en: 'The morning crowd magnet.',
     bm: 'Tarikan utama setiap pagi.' },
-  { id: 'tetap',    name: 'Pelanggan Tetap',     nameEn: 'Loyal Regulars',   base: 2600,    cps: 55,
+  { id: 'tetap',    name: 'Pelanggan Tetap',     nameEn: 'Loyal Regulars',   base: 2600,    cps: 100,
     en: 'They come even in heavy rain.',
     bm: 'Mereka datang walaupun hujan lebat.' },
-  { id: 'rider',    name: 'Rider Penghantaran',  nameEn: 'Delivery Rider',   base: 32000,   cps: 400,
+  { id: 'rider',    name: 'Rider Penghantaran',  nameEn: 'Delivery Rider',   base: 32000,   cps: 700,
     en: 'Coffee to the office in 30 minutes.',
     bm: 'Kopi sampai ke ofis dalam 30 minit.' },
-  { id: 'cawangan', name: 'Cawangan Warung',     nameEn: 'Branch Outlet',    base: 450000,  cps: 3200,
+  { id: 'cawangan', name: 'Cawangan Warung',     nameEn: 'Branch Outlet',    base: 450000,  cps: 5200,
     en: 'Another shop at the end of the road.',
     bm: 'Satu lagi kedai di hujung jalan.' },
   { id: 'francais', name: 'Francais Kebangsaan', nameEn: 'National Franchise', base: 7.5e6, cps: 26000,
@@ -140,7 +140,7 @@ EQ_TIERS.forEach(function (row) {
 
 /* ---------------- mystic buffs & goals ---------------- */
 const BUFFS = [
-  { id: 'azimat',  icon: '\ud83e\uddfF', en: 'Bomoh\u2019s Charm',  bm: 'Azimat Bomoh',      cost: 5,  enD: '+50% click value',                        bmD: '+50% nilai klik' },
+  { id: 'azimat',  icon: '\ud83e\uddfF', en: 'Bomoh\u2019s Charm',  bm: 'Azimat Bomoh',      cost: 3,  enD: '+50% click value',                        bmD: '+50% nilai klik' },
   { id: 'toyol',   icon: '\ud83d\udc7a', en: 'Helpful Toyol',      bm: 'Toyol Penolong',    cost: 8,  enD: '+10% income from every outlet',           bmD: '+10% pendapatan semua kedai' },
   { id: 'jam',     icon: '\u23f3',       en: 'Hourglass of Ages',  bm: 'Jam Pasir Sakti',   cost: 10, enD: '+2 hours offline earnings',               bmD: '+2 jam pendapatan offline' },
   { id: 'naga',    icon: '\ud83d\udc09', en: 'Coffee Dragon',      bm: 'Naga Kopi',         cost: 12, enD: 'Offline rate 50% \u2192 75%',             bmD: 'Kadar offline 50% \u2192 75%' },
@@ -182,7 +182,7 @@ const T = {
     resetTitle: 'Reset everything', resetSub: 'Wipes all progress including prestige layers.',
     save: 'Save', export: 'Export', import: 'Import', reset: 'Reset',
     p1: 'Balik Kampung', p2: 'Franchise Expansion',
-    p1Locked: 'Earn RM 10.00M lifetime to unlock.',
+    p1Locked: 'Earn RM 1.00M lifetime to unlock.',
     p2Locked: 'Reach 100 Warung Tokens to unlock.',
     p1Ready: (g, tk) => 'Convert to ' + g + ' Warung Token (+' + (g * 10).toFixed(0) + '% earnings). You have ' + tk + '.',
     p2Ready: (g) => 'Spend all Warung Tokens for ' + g + ' Franchise Star (+50% each, forever).',
@@ -214,7 +214,7 @@ const T = {
     resetTitle: 'Set semula semua', resetSub: 'Padam semua kemajuan termasuk lapisan prestij.',
     save: 'Simpan', export: 'Eksport', import: 'Import', reset: 'Set Semula',
     p1: 'Balik Kampung', p2: 'Buka Francais',
-    p1Locked: 'Kumpul RM 10.00J seumur hidup untuk buka.',
+    p1Locked: 'Kumpul RM 1.00J seumur hidup untuk buka.',
     p2Locked: 'Dapatkan 100 Warung Token untuk buka.',
     p1Ready: (g, tk) => 'Tukar kepada ' + g + ' Warung Token (+' + (g * 10).toFixed(0) + '% pendapatan). Anda ada ' + tk + '.',
     p2Ready: (g) => 'Guna semua Warung Token untuk ' + g + ' Bintang Francais (+50% setiap satu, kekal).',
@@ -231,7 +231,7 @@ const T = {
 };
 
 /* ---------------- state ---------------- */
-const VERSION = '2026.11.16-1';
+const VERSION = '2026.11.16-2';
 const SAVE_KEY = 'kopitiam-kosong-v2';
 const OLD_KEY = 'kopitiam-kosong-v1';
 
@@ -279,7 +279,8 @@ function mult() {
   return (1 + S.tokens * 0.1) * (1 + S.bintang * 0.5) * (1 + achBonus() / 100) * buffIncomeMult();
 }
 function clickPower() {
-  let v = (CLICK_BASE + S.clicks * 0.0005) * mult();
+  const tier = 1 + Math.floor(S.clicks / 50);          // +100% base every 50 taps
+  let v = (CLICK_BASE * tier + S.clicks * 0.0002) * mult();
   if (hasBuff('azimat')) v *= 1.5;
   if (hasBuff('semangat')) v += val(cps()) * 0.01;
   return fromNum(v);
@@ -302,7 +303,7 @@ function maxAffordable(b) {
 }
 function p1Gain() {
   if (cmp(S.lifetime, fromNum(P1_UNLOCK)) < 0) return 0;
-  const g = Math.floor((S.lifetime.e - 7) * 5 + 1) * (1 + S.bintang * 0.25);
+  const g = Math.floor((S.lifetime.e - 6) * 5 + 1) * (1 + S.bintang * 0.25);
   return Math.max(1, Math.floor(g));
 }
 function p2Gain() {
