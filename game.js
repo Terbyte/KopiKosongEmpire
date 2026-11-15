@@ -270,7 +270,7 @@ const T = {
 };
 
 /* ---------------- state ---------------- */
-const VERSION = '2026.11.16-20';
+const VERSION = '2026.11.16-21';
 const SAVE_KEY = 'kopitiam-kosong-v2';
 const OLD_KEY = 'kopitiam-kosong-v1';
 
@@ -839,7 +839,7 @@ const END_TXT = {
     brews: 'cups brewed', earned: 'earned all-time', prestiges: 'balik kampung', ach: 'achievements',
     beans: 'biji kopi', franchises: 'franchises', played: 'time played',
     thanks: 'Thank you for playing. Every tap you gave this little shop kept the lights on — <em>terima kasih kerana menyokong kedai kecil ini.</em> If you made it this far, you are the reason it stayed open.',
-    role1: 'CREATED BY', who1: 'Imran Afiffuddin',
+    role1: 'CREATED BY', who1: 'Terbyte',
     role2: 'BUILT WITH', who2: 'Hermes Agent',
     foot: 'Kopi Kosong Empire · Malaysia · 2026',
     cont: 'Continue — Empayar Mode',
@@ -853,7 +853,7 @@ const END_TXT = {
     brews: 'cawan dibancuh', earned: 'jumlah pendapatan', prestiges: 'balik kampung', ach: 'pencapaian',
     beans: 'biji kopi', franchises: 'francais', played: 'masa bermain',
     thanks: 'Terima kasih kerana bermain. Setiap ketukan anda menghidupkan kedai kecil ini — <em>thank you for staying until the last cup.</em> Kalau anda sampai sejauh ini, andalah sebab kedai ini masih buka.',
-    role1: 'DICIPTA OLEH', who1: 'Imran Afiffuddin',
+    role1: 'DICIPTA OLEH', who1: 'Terbyte',
     role2: 'DIBINA DENGAN', who2: 'Hermes Agent',
     foot: 'Kopi Kosong Empire · Malaysia · 2026',
     cont: 'Teruskan — Mod Empayar',
