@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
 <title>Kopi Kosong Empire — Kopitiam Idle Game</title>
-<link rel="stylesheet" href="style.css?v=2026.11.16-22" />
+<link rel="stylesheet" href="style.css?v=2026.11.16-23" />
 </head>
 <body>
 
@@ -247,6 +247,8 @@
     <div class="prestige-info">
       <strong id="p1Title">Balik Kampung</strong>
       <span id="prestigeInfo">Collect RM 10.00M lifetime to unlock.</span>
+      <div class="preq" id="p1Req"><i id="p1Bar"></i></div>
+      <span class="pneed" id="p1Need"></span>
     </div>
     <button id="prestigeBtn" disabled>Balik Kampung</button>
   </div>
@@ -255,6 +257,8 @@
     <div class="prestige-info">
       <strong id="p2Title">Franchise Expansion</strong>
       <span id="prestige2Info">Reach 100 Warung Tokens to unlock.</span>
+      <div class="preq" id="p2Req"><i id="p2Bar"></i></div>
+      <span class="pneed" id="p2Need"></span>
     </div>
     <button id="prestige2Btn" disabled>Expand Franchise</button>
   </div>
@@ -269,6 +273,19 @@
     <div id="offAmount" class="offamount">RM 0.00</div>
     <div class="muted" id="offSub">Your kedai kept brewing.</div>
     <button id="claimOffline" class="btn gold">Claim</button>
+  </div>
+</div>
+
+<div id="prestigePop" class="ppop" aria-live="assertive">
+  <div class="ppop-card">
+    <div class="ppop-icon">♻️</div>
+    <div class="ppop-text">
+      <div class="ppop-kicker" id="ppopKicker">BALIK KAMPUNG READY</div>
+      <div class="ppop-title" id="ppopTitle"></div>
+      <div class="ppop-sub" id="ppopSub"></div>
+    </div>
+    <button id="ppopGo">RESET</button>
+    <button id="ppopClose" class="ppop-x">×</button>
   </div>
 </div>
 
@@ -313,6 +330,6 @@
 </div>
 <div id="toast" class="toast"></div>
 
-<script src="game.js?v=2026.11.16-22"></script>
+<script src="game.js?v=2026.11.16-23"></script>
 </body>
 </html>

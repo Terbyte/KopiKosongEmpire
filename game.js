@@ -270,7 +270,7 @@ const T = {
 };
 
 /* ---------------- state ---------------- */
-const VERSION = '2026.11.16-22';
+const VERSION = '2026.11.16-23';
 const SAVE_KEY = 'kopitiam-kosong-v2';
 const OLD_KEY = 'kopitiam-kosong-v1';
 
@@ -969,10 +969,39 @@ function buyBuff(id) {
 }
 
 let mpopQ = [], mpopOpen = false, mpopTimer = null, lastReadyIds = null, currentPopupId = null;
+let ppopShown = false, ppopTimer = null;
 
 function readyGoalIds() {
   return GOALS.filter(function (g) { return !S.goals[g.id] && g.ok(S); })
               .map(function (g) { return g.id; });
+}
+
+function checkPrestigePopup() {
+  const g1 = p1Gain();
+  const el = $('prestigePop');
+  if (!el) return;
+  if (g1 <= 0) { ppopShown = false; el.classList.remove('show'); return; }
+  if (ppopShown) return;
+  ppopShown = true;
+  $('ppopKicker').textContent = S.lang === 'bm' ? 'BALIK KAMPUNG SEDIA' : 'BALIK KAMPUNG READY';
+  $('ppopTitle').textContent = (S.lang === 'bm' ? 'Tukar sekarang: +' : 'Reset now: +') + g1 + ' Warung Token';
+  $('ppopSub').textContent = S.lang === 'bm'
+    ? '+' + (g1 * 10) + '% pendapatan kekal, dan bina semula jauh lebih pantas. Ini langkah terpantas untuk maju.'
+    : '+' + (g1 * 10) + '% permanent earnings, and you rebuild far faster. This is the fastest way forward.';
+  $('ppopGo').textContent = S.lang === 'bm' ? 'TUKAR' : 'RESET';
+  el.classList.add('show');
+  clearTimeout(ppopTimer);
+  ppopTimer = setTimeout(function () { el.classList.remove('show'); }, 15000);
+}
+
+function bindPrestigePopup() {
+  const go = $('ppopGo'), close = $('ppopClose');
+  if (go) go.addEventListener('click', function () {
+    $('prestigePop').classList.remove('show');
+    const g = p1Gain();
+    if (g > 0 && confirm(t().confirm1(g))) doP1();
+  });
+  if (close) close.addEventListener('click', function () { $('prestigePop').classList.remove('show'); });
 }
 
 function checkMissionPopups() {
@@ -1240,6 +1269,22 @@ function renderStats() {
 
 function renderPrestige() {
   const g1 = p1Gain();
+
+  // show exactly how much RM is still needed
+  const lt = val(S.lifetime);
+  const pct1 = Math.max(0, Math.min(1, lt / P1_UNLOCK));
+  const bar1 = $('p1Bar'), need1 = $('p1Need');
+  if (bar1) bar1.style.width = (pct1 * 100).toFixed(1) + '%';
+  if (need1) {
+    if (g1 > 0) {
+      need1.textContent = (S.lang === 'bm' ? 'Sedia: ' : 'Ready: ') + fmtRM(S.lifetime) + ' lifetime';
+    } else {
+      const left = P1_UNLOCK - lt;
+      need1.textContent = fmtRM(S.lifetime) + ' / ' + fmtRM(fromNum(P1_UNLOCK)) +
+        '  ·  ' + (S.lang === 'bm' ? 'perlu ' : 'need ') + fmtRM(fromNum(left)) + (S.lang === 'bm' ? ' lagi' : ' more');
+    }
+  }
+
   $('prestigeInfo').textContent = g1 > 0 ? t().p1Ready(g1) : t().p1Locked;
   $('prestigeBtn').disabled = g1 <= 0;
   const ready = g1 > 0 && (g1 >= S.tokens + 2 || val(S.lifetime) >= P1_UNLOCK * 8);
@@ -1248,6 +1293,18 @@ function renderPrestige() {
   $('prestigeBtn').textContent = g1 > 0 ? t().p1Btn + ' (+' + g1 + ')' : t().p1Btn;
 
   const g2 = p2Gain();
+  const pct2 = Math.max(0, Math.min(1, S.tokens / P2_UNLOCK_TOKENS));
+  const bar2 = $('p2Bar'), need2 = $('p2Need');
+  if (bar2) bar2.style.width = (pct2 * 100).toFixed(1) + '%';
+  if (need2) {
+    if (g2 > 0) {
+      need2.textContent = (S.lang === 'bm' ? 'Sedia: ' : 'Ready: ') + S.tokens + ' / ' + P2_UNLOCK_TOKENS + ' tokens';
+    } else {
+      need2.textContent = S.tokens + ' / ' + P2_UNLOCK_TOKENS + ' tokens  ·  ' +
+        (S.lang === 'bm' ? 'perlu ' : 'need ') + Math.max(0, P2_UNLOCK_TOKENS - S.tokens) +
+        (S.lang === 'bm' ? ' lagi' : ' more');
+    }
+  }
   $('prestige2Info').textContent = g2 > 0 ? t().p2Ready(g2) : t().p2Locked;
   $('prestige2Btn').disabled = g2 <= 0;
   $('prestige2Btn').textContent = g2 > 0 ? t().p2Btn + ' (+' + g2 + ')' : t().p2Btn;
@@ -1343,6 +1400,7 @@ function render() {
   updateMissionBadge();
   renderEmpayar();
   checkFinish();
+  checkPrestigePopup();
   checkMissionPopups();
   if ($('panel-achievements').classList.contains('active') && achSignature() !== achSig) renderAch();
   if ($('panel-buffs').classList.contains('active') && buffSignature() !== buffSig) renderBuffs();
@@ -1431,6 +1489,7 @@ function loop(now) {
 function init() {
   bindEnding();
   bindMissionPopup();
+  bindPrestigePopup();
   const hadSave = load();
   applyLang();
 
