@@ -139,6 +139,7 @@ const T = {
     confirm1: (g) => 'Balik Kampung?\n\nAll cash and equipment reset. You gain ' + g + ' Warung Token (+' + (g * 10) + '% forever).',
     confirm2: (g) => 'Expand franchise?\n\nAll Warung Tokens are spent. You gain ' + g + ' Franchise Star (+' + (g * 50) + '% forever, and faster token gain).',
     toastAch: (n) => 'Achievement unlocked: ' + n + ' (+1% earnings)',
+    achKicker: 'Achievement unlocked', achSub: '+1% earnings, permanently',
     toastSave: 'Saved.', toastWelcome: 'Welcome. Click the cup to brew kopi.',
     toastBack: (g) => 'Welcome back! While away: +' + g,
     toastP1: (g) => 'Balik kampung! +' + g + ' Warung Token',
@@ -170,6 +171,7 @@ const T = {
     confirm1: (g) => 'Balik kampung?\n\nSemua tunai dan peralatan direset. Anda dapat ' + g + ' Warung Token (+' + (g * 10) + '% kekal).',
     confirm2: (g) => 'Buka francais?\n\nSemua Warung Token digunakan. Anda dapat ' + g + ' Bintang Francais (+' + (g * 50) + '% kekal, dan token lebih cepat).',
     toastAch: (n) => 'Pencapaian dibuka: ' + n + ' (+1% pendapatan)',
+    achKicker: 'Pencapaian dibuka', achSub: '+1% pendapatan, kekal',
     toastSave: 'Disimpan.', toastWelcome: 'Selamat datang. Klik cawan untuk bancuh kopi.',
     toastBack: (g) => 'Selamat kembali! Semasa tiada: +' + g,
     toastP1: (g) => 'Balik kampung! +' + g + ' Warung Token',
@@ -178,7 +180,7 @@ const T = {
 };
 
 /* ---------------- state ---------------- */
-const VERSION = '2026.11.15-4';
+const VERSION = '2026.11.15-5';
 const SAVE_KEY = 'kopitiam-kosong-v2';
 const OLD_KEY = 'kopitiam-kosong-v1';
 
@@ -439,12 +441,51 @@ function doP2() {
   sfxP2(); toast(t().toastP2(g)); checkAchievements(); render(); save();
 }
 
+let achQ = [], achUp = false;
+
+function sparks() {
+  const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
+  for (let i = 0; i < 16; i++) {
+    const sp = document.createElement('div');
+    sp.className = 'spark';
+    const ang = Math.random() * Math.PI * 2;
+    const dist = 110 + Math.random() * 150;
+    sp.style.setProperty('--dx', (Math.cos(ang) * dist).toFixed(0) + 'px');
+    sp.style.setProperty('--dy', (Math.sin(ang) * dist).toFixed(0) + 'px');
+    sp.style.left = cx + 'px';
+    sp.style.top = cy + 'px';
+    document.body.appendChild(sp);
+    setTimeout(function () { sp.remove(); }, 1000);
+  }
+}
+
+function queueAch(a) {
+  achQ.push(a);
+  if (!achUp) nextAch();
+}
+
+function nextAch() {
+  const a = achQ.shift();
+  if (!a) { achUp = false; return; }
+  achUp = true;
+  const pop = $('achPop');
+  $('achKicker').textContent = t().achKicker;
+  $('achPopTitle').textContent = (S.lang === 'bm' ? a.bm : a.en);
+  $('achPopSub').textContent = t().achSub;
+  pop.classList.add('show');
+  sfxAch();
+  sparks();
+  setTimeout(function () {
+    pop.classList.remove('show');
+    setTimeout(nextAch, 430);
+  }, 2400);
+}
+
 function checkAchievements() {
   for (const a of ACHIEVEMENTS) {
     if (!S.ach[a.id] && a.ok(S)) {
       S.ach[a.id] = true;
-      sfxAch();
-      toast(t().toastAch(S.lang === 'bm' ? a.bm : a.en));
+      queueAch(a);
     }
   }
 }
