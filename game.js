@@ -57,8 +57,8 @@ const fmtRM = (a) => 'RM ' + fmt(a);
 /* ---------------- content ---------------- */
 const COST_MULT = 1.15;
 const CLICK_BASE = 0.05;
-const OFFLINE_CAP_HOURS = 8;
-const OFFLINE_RATE = 0.5;
+const OFFLINE_CAP_HOURS = 3;
+const OFFLINE_RATE = 0.2;
 const P1_UNLOCK = 1.2e5;
 const P2_UNLOCK_TOKENS = 100;
 
@@ -268,7 +268,7 @@ const T = {
 };
 
 /* ---------------- state ---------------- */
-const VERSION = '2026.11.16-17';
+const VERSION = '2026.11.16-18';
 const SAVE_KEY = 'kopitiam-kosong-v2';
 const OLD_KEY = 'kopitiam-kosong-v1';
 
