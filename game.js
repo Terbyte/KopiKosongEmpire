@@ -172,26 +172,26 @@ function buffCost(b) { return Math.round(b.baseCost * Math.pow(BUFF_GROWTH, buff
 
 
 const GOALS = [
-  { id: 'g_brew100',  en: 'Brew 100 cups',            bm: 'Bancuh 100 cawan',        reward: 2, ok: s => s.clicks >= 100,   p: s => [s.clicks, 100] },
-  { id: 'g_k10',      en: 'Own 10 kettles',           bm: 'Miliki 10 cerek',         reward: 2, ok: s => s.counts.cerek >= 10, p: s => [s.counts.cerek, 10] },
-  { id: 'g_rm1k',     en: 'Earn RM 1,000',            bm: 'Peroleh RM 1,000',        reward: 3, ok: s => s.lifetime.e >= 3, p: s => [Math.min(val(s.lifetime), 1000), 1000] },
-  { id: 'g_full',     en: 'Own every building type',  bm: 'Miliki semua jenis kedai',reward: 5, ok: s => BUILDINGS.every(b => s.counts[b.id] >= 1), p: s => [BUILDINGS.filter(b => s.counts[b.id] >= 1).length, BUILDINGS.length] },
-  { id: 'g_brew1k',   en: 'Brew 1,000 cups',          bm: 'Bancuh 1,000 cawan',      reward: 4, ok: s => s.clicks >= 1000,  p: s => [s.clicks, 1000] },
-  { id: 'g_ach10',    en: 'Unlock 10 achievements',   bm: 'Buka 10 pencapaian',      reward: 4, ok: s => achCount() >= 10,  p: s => [achCount(), 10] },
-  { id: 'g_rm100k',   en: 'Earn RM 100,000',          bm: 'Peroleh RM 100,000',      reward: 5, ok: s => s.lifetime.e >= 5, p: s => [Math.min(val(s.lifetime), 100000), 100000] },
-  { id: 'g_k50',      en: 'Own 50 kettles',           bm: 'Miliki 50 cerek',         reward: 5, ok: s => s.counts.cerek >= 50, p: s => [s.counts.cerek, 50] },
-  { id: 'g_tok10',    en: 'Reach 10 Warung Tokens',   bm: 'Capai 10 Warung Token',   reward: 6, ok: s => s.tokens >= 10,   p: s => [s.tokens, 10] },
-  { id: 'g_rm10m',    en: 'Earn RM 10 million',       bm: 'Peroleh RM 10 juta',      reward: 8, ok: s => s.lifetime.e >= 7, p: s => [Math.min(val(s.lifetime), 1e7), 1e7] },
+  { id: 'g_brew100',  en: 'Brew 100 cups',            bm: 'Bancuh 100 cawan',        reward: 1, ok: s => s.clicks >= 100,   p: s => [s.clicks, 100] },
+  { id: 'g_k10',      en: 'Own 10 kettles',           bm: 'Miliki 10 cerek',         reward: 1, ok: s => s.counts.cerek >= 10, p: s => [s.counts.cerek, 10] },
+  { id: 'g_rm1k',     en: 'Earn RM 1,000',            bm: 'Peroleh RM 1,000',        reward: 2, ok: s => s.lifetime.e >= 3, p: s => [Math.min(val(s.lifetime), 1000), 1000] },
+  { id: 'g_full',     en: 'Own every building type',  bm: 'Miliki semua jenis kedai',reward: 3, ok: s => BUILDINGS.every(b => s.counts[b.id] >= 1), p: s => [BUILDINGS.filter(b => s.counts[b.id] >= 1).length, BUILDINGS.length] },
+  { id: 'g_brew1k',   en: 'Brew 1,000 cups',          bm: 'Bancuh 1,000 cawan',      reward: 2, ok: s => s.clicks >= 1000,  p: s => [s.clicks, 1000] },
+  { id: 'g_ach10',    en: 'Unlock 10 achievements',   bm: 'Buka 10 pencapaian',      reward: 3, ok: s => achCount() >= 10,  p: s => [achCount(), 10] },
+  { id: 'g_rm100k',   en: 'Earn RM 100,000',          bm: 'Peroleh RM 100,000',      reward: 4, ok: s => s.lifetime.e >= 5, p: s => [Math.min(val(s.lifetime), 100000), 100000] },
+  { id: 'g_k50',      en: 'Own 50 kettles',           bm: 'Miliki 50 cerek',         reward: 4, ok: s => s.counts.cerek >= 50, p: s => [s.counts.cerek, 50] },
+  { id: 'g_tok10',    en: 'Reach 10 Warung Tokens',   bm: 'Capai 10 Warung Token',   reward: 5, ok: s => s.tokens >= 10,   p: s => [s.tokens, 10] },
+  { id: 'g_rm10m',    en: 'Earn RM 10 million',       bm: 'Peroleh RM 10 juta',      reward: 6, ok: s => s.lifetime.e >= 7, p: s => [Math.min(val(s.lifetime), 1e7), 1e7] },
 
   // ---- extended set ----
-  { id: 'g_brew2500', en: 'Brew 2,500 cups',          bm: 'Bancuh 2,500 cawan',      reward: 6, ok: s => s.clicks >= 2500, p: s => [s.clicks, 2500] },
-  { id: 'g_k100',     en: 'Own 100 kettles',          bm: 'Miliki 100 cerek',        reward: 6, ok: s => s.counts.cerek >= 100, p: s => [s.counts.cerek, 100] },
+  { id: 'g_brew2500', en: 'Brew 2,500 cups',          bm: 'Bancuh 2,500 cawan',      reward: 5, ok: s => s.clicks >= 2500, p: s => [s.clicks, 2500] },
+  { id: 'g_k100',     en: 'Own 100 kettles',          bm: 'Miliki 100 cerek',        reward: 5, ok: s => s.counts.cerek >= 100, p: s => [s.counts.cerek, 100] },
   { id: 'g_rm1m',     en: 'Earn RM 1 million',        bm: 'Peroleh RM 1 juta',       reward: 6, ok: s => s.lifetime.e >= 6, p: s => [Math.min(val(s.lifetime), 1e6), 1e6] },
   { id: 'g_ach20',    en: 'Unlock 20 achievements',   bm: 'Buka 20 pencapaian',      reward: 6, ok: s => achCount() >= 20, p: s => [achCount(), 20] },
   { id: 'g_buff3',    en: 'Reach 3 buff levels',      bm: 'Capai 3 level berkat',    reward: 5, ok: s => buffTotal() >= 3, p: s => [buffTotal(), 3] },
   { id: 'g_ads5',     en: 'Watch 5 ads',              bm: 'Tonton 5 iklan',          reward: 4, ok: s => (s.adsTotal || 0) >= 5, p: s => [s.adsTotal || 0, 5] },
   { id: 'g_all5',     en: 'Own 5 of every building',  bm: 'Miliki 5 setiap bangunan', reward: 8, ok: s => BUILDINGS.every(b => s.counts[b.id] >= 5), p: s => [BUILDINGS.filter(b => s.counts[b.id] >= 5).length, BUILDINGS.length] },
-  { id: 'g_brew10k',  en: 'Brew 10,000 cups',         bm: 'Bancuh 10,000 cawan',     reward: 10, ok: s => s.clicks >= 10000, p: s => [s.clicks, 10000] },
+  { id: 'g_brew10k',  en: 'Brew 10,000 cups',         bm: 'Bancuh 10,000 cawan',     reward: 8, ok: s => s.clicks >= 10000, p: s => [s.clicks, 10000] },
   { id: 'g_tok50',    en: 'Hold 50 Warung Tokens',    bm: 'Pegang 50 Warung Token',  reward: 10, ok: s => s.tokens >= 50, p: s => [s.tokens, 50] },
   { id: 'g_p5',       en: 'Prestige 5 times',         bm: 'Prestij 5 kali',          reward: 8, ok: s => s.prestiges >= 5, p: s => [s.prestiges, 5] },
 ];
@@ -265,7 +265,7 @@ const T = {
 };
 
 /* ---------------- state ---------------- */
-const VERSION = '2026.11.16-10';
+const VERSION = '2026.11.16-11';
 const SAVE_KEY = 'kopitiam-kosong-v2';
 const OLD_KEY = 'kopitiam-kosong-v1';
 
@@ -813,8 +813,13 @@ function updateAchBadge() {
   if (bb) bb.textContent = S.beans;
 }
 
+function missionSlots() {
+  const types = BUILDINGS.filter(function (b) { return (S.counts[b.id] || 0) > 0; }).length;
+  return Math.min(5, 1 + types);
+}
+
 function activeGoals() {
-  return GOALS.filter(function (g) { return !S.goals[g.id]; }).slice(0, 3);
+  return GOALS.filter(function (g) { return !S.goals[g.id]; }).slice(0, missionSlots());
 }
 
 function buyBuff(id) {
@@ -848,7 +853,9 @@ function storeSig() { return S.lang + '|' + adsLeft() + '|' + (boostActive() ? M
 
 let lastMissionSig = '';
 function missionSig() {
-  return S.lang + '|' + activeGoals().map(function (g) { return g.id + (g.ok(S) ? '1' : '0'); }).join(',');
+  return S.lang + '|' + missionSlots() + '|' +
+    activeGoals().map(function (g) { return g.id + (g.ok(S) ? '1' : '0'); }).join(',') + '|' +
+    Object.keys(S.goals).length;
 }
 
 let buffSig = '';
@@ -899,6 +906,7 @@ function renderBuffs() {
 function renderMissions() {
   lastMissionSig = missionSig();
   const goals = activeGoals();
+  const slots = missionSlots();
   $('goalList').innerHTML = goals.length ? goals.map(function (g) {
     const pr = g.p(S);
     const done = g.ok(S);
@@ -908,10 +916,29 @@ function renderMissions() {
         '<div class="gprog">' + fmtn(pr[0]) + ' / ' + fmtn(pr[1]) + '</div></div>' +
       '<span class="reward">+' + g.reward + ' 🫘</span>' +
       '<button data-goal="' + g.id + '" ' + (done ? '' : 'disabled') + '>' +
-        (done ? (S.lang === 'bm' ? 'TUNTUT' : 'CLAIM') : (S.lang === 'bm' ? 'BELUM' : 'LOCKED')) +
+        (done ? (S.lang === 'bm' ? 'TUNTUT' : 'CLAIM') : (S.lang === 'bm' ? 'PROSES' : 'IN PROGRESS')) +
       '</button>' +
     '</div>';
-  }).join('') : '<div class="muted">' + (S.lang === 'bm' ? 'Semua matlamat selesai.' : 'All goals complete.') + '</div>';
+  }).join('') : '<div class="muted">' + (S.lang === 'bm' ? 'Semua misi selesai.' : 'All missions complete.') + '</div>';
+
+  let locked = '';
+  for (let i = goals.length; i < slots; i++) {
+    locked += '<div class="goal locked">' +
+      '<div class="gtxt">' + (S.lang === 'bm' ? 'Slot kosong' : 'Empty slot') +
+      '<div class="gprog">' + (S.lang === 'bm' ? 'Semua misi sedang berjalan' : 'All active missions shown') + '</div></div>' +
+      '<span class="reward">—</span><button disabled>—</button></div>';
+  }
+  if (GOALS.filter(function (g) { return !S.goals[g.id]; }).length > goals.length) {
+    locked += '<div class="goal locked"><div class="gtxt">' +
+      (S.lang === 'bm' ? 'Slot seterusnya' : 'Next slot') +
+      '<div class="gprog">' + (S.lang === 'bm'
+        ? 'Beli satu jenis kedai baharu untuk buka slot misi'
+        : 'Buy a new outlet type to unlock another mission slot') + '</div></div>' +
+      '<span class="reward">🔒</span><button disabled>—</button></div>';
+  }
+  const slotInfo = $('slotInfo');
+  if (slotInfo) slotInfo.textContent = (S.lang === 'bm' ? 'Slot misi: ' : 'Mission slots: ') + slots + ' / 5';
+  $('goalList').innerHTML += locked;
 }
 
 function ladderInfo(grp) {
