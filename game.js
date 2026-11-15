@@ -231,7 +231,7 @@ const T = {
 };
 
 /* ---------------- state ---------------- */
-const VERSION = '2026.11.16-3';
+const VERSION = '2026.11.16-4';
 const SAVE_KEY = 'kopitiam-kosong-v2';
 const OLD_KEY = 'kopitiam-kosong-v1';
 
@@ -700,6 +700,13 @@ function buffSignature() {
 function renderBuffs() {
   buffSig = buffSignature();
   const d = t();
+  const guide = $('buffGuide');
+  if (guide) {
+    const nextAch = ACHIEVEMENTS.filter(function (a) { return !S.ach[a.id]; }).length;
+    guide.innerHTML = S.lang === 'bm'
+      ? 'Anda ada <b>' + S.beans + '</b> biji. Buka pencapaian untuk +1 setiap satu (' + nextAch + ' lagi tinggal), atau tuntut matlamat untuk +2 hingga +8.'
+      : 'You have <b>' + S.beans + '</b> beans. Unlock achievements for <b>+1</b> each (' + nextAch + ' left), or claim goals for <b>+2 to +8</b>.';
+  }
   $('beanCount').textContent = S.beans;
   const bb = $('beanBadge');
   if (bb) bb.textContent = S.beans;
@@ -1088,6 +1095,15 @@ function init() {
   }
   $('soundBtn').addEventListener('click', toggleSound);
   $('soundToggle').addEventListener('click', toggleSound);
+
+  $('beanHelp').addEventListener('click', function (e) {
+    e.stopPropagation();
+    document.querySelector('.beanbar').classList.toggle('open');
+  });
+  document.addEventListener('click', function (e) {
+    const bar = document.querySelector('.beanbar');
+    if (bar && !bar.contains(e.target)) bar.classList.remove('open');
+  });
 
   $('buffList').addEventListener('click', function (e) {
     const btn = e.target.closest('button[data-buff]');

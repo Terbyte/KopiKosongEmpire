@@ -920,3 +920,59 @@ footer {
   40% { transform: scale(1.06); }
   100% { transform: scale(1); }
 }
+
+/* ---------- hint "?" + tooltip ---------- */
+.beanbar { position: relative; flex-wrap: wrap; }
+.hintq {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  border: 1px solid var(--kuning);
+  background: rgba(240,180,41,.15);
+  color: var(--kuning);
+  font-size: 12px; font-weight: 700; line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.hintq:hover, .hintq:focus { background: var(--kuning); color: #22140a; outline: none; }
+
+.hintpop {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 30;
+  width: min(340px, 86vw);
+  background: #1d1209;
+  border: 1px solid var(--kuning);
+  border-radius: 12px;
+  padding: 12px 14px;
+  box-shadow: 0 18px 44px rgba(0,0,0,.7);
+  font-size: 12px;
+  line-height: 1.55;
+  opacity: 0;
+  transform: translateY(-6px);
+  pointer-events: none;
+  transition: opacity .18s ease, transform .18s ease;
+}
+.hintpop b { color: #ffe9b0; }
+.hintpop ul { margin: 7px 0 0; padding-left: 16px; }
+.hintpop li { margin-bottom: 4px; }
+.hintpop i { color: #c9a97a; font-style: normal; }
+
+.beanbar:hover .hintpop,
+.beanbar:focus-within .hintpop,
+.beanbar.open .hintpop { opacity: 1; transform: translateY(0); pointer-events: auto; }
+
+.guide {
+  font-size: 11.5px;
+  color: #c9a97a;
+  opacity: .8;
+  margin: -6px 0 14px;
+  line-height: 1.5;
+}
+
+#buffGuide { margin: -4px 0 14px; }
+#goalGuide { margin: 12px 0 0; }
+@media (max-width: 620px) {
+  .hintpop { width: min(300px, 88vw); font-size: 11.5px; }
+}
