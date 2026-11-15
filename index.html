@@ -42,6 +42,16 @@
   <section class="panel active" id="panel-shop">
     <div class="counter">
       <button id="brewBtn" class="brew" aria-label="Brew coffee">
+        <svg class="ring" viewBox="0 0 240 240" aria-hidden="true">
+          <defs>
+            <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="currentColor"/>
+              <stop offset="100%" stop-color="currentColor" stop-opacity=".35"/>
+            </linearGradient>
+          </defs>
+          <circle class="ring-bg" cx="120" cy="120" r="112"/>
+          <circle class="ring-fill" id="ringFill" cx="120" cy="120" r="112"/>
+        </svg>
         <svg viewBox="0 0 120 120" class="cup" aria-hidden="true">
           <ellipse cx="60" cy="98" rx="34" ry="7" class="saucer"/>
           <path d="M28 44 h56 v26 a28 22 0 0 1 -56 0 z" class="body"/>

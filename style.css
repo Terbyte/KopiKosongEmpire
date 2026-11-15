@@ -859,3 +859,64 @@ footer {
 }
 .goal button:disabled { background: #3a2614; color: #8a7050; cursor: not-allowed; }
 .goal .reward { font-size: 11px; color: var(--kuning); white-space: nowrap; }
+
+/* ---------- brew progress ring ---------- */
+.brew { position: relative; overflow: visible; }
+.ring {
+  position: absolute;
+  inset: -14px;
+  width: calc(100% + 28px);
+  height: calc(100% + 28px);
+  transform: rotate(-90deg);
+  pointer-events: none;
+  overflow: visible;
+  z-index: 2;
+}
+.ring-bg {
+  fill: none;
+  stroke: rgba(240,180,41,.10);
+  stroke-width: 9;
+}
+.ring-fill {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 9;
+  stroke-linecap: round;
+  stroke-dasharray: 704;
+  stroke-dashoffset: 704;
+  transition: stroke-dashoffset .35s cubic-bezier(.2,.8,.3,1), stroke .5s ease, filter .5s ease;
+  filter: drop-shadow(0 0 5px currentColor);
+}
+.brew.tier-0 { color: #f0b429; }
+.brew.tier-1 { color: #ffb03a; }
+.brew.tier-2 { color: #ff8c42; }
+.brew.tier-3 { color: #ff5d73; }
+.brew.tier-4 { color: #d455ff; }
+.brew.tier-5 { color: #8b6bff; }
+.brew.tier-6 { color: #4fa8ff; }
+.brew.tier-7 { color: #38e8c8; }
+.brew.tier-8 { color: #6cff9e; }
+
+/* higher tiers glow harder and breathe */
+.brew.tier-4 .ring-fill, .brew.tier-5 .ring-fill { filter: drop-shadow(0 0 9px currentColor); }
+.brew.tier-6 .ring-fill, .brew.tier-7 .ring-fill,
+.brew.tier-8 .ring-fill { filter: drop-shadow(0 0 14px currentColor); }
+.brew.tier-6 .ring, .brew.tier-7 .ring, .brew.tier-8 .ring { animation: ringBreathe 2.4s ease-in-out infinite; }
+@keyframes ringBreathe {
+  0%, 100% { transform: rotate(-90deg) scale(1); }
+  50%      { transform: rotate(-90deg) scale(1.035); }
+}
+
+/* tier-up burst */
+.brew.ring-burst .ring-fill { animation: ringBurst .75s cubic-bezier(.2,1.4,.4,1); }
+@keyframes ringBurst {
+  0%   { stroke-width: 9; filter: drop-shadow(0 0 6px currentColor); }
+  35%  { stroke-width: 16; filter: drop-shadow(0 0 26px currentColor) brightness(1.9); }
+  100% { stroke-width: 9; filter: drop-shadow(0 0 8px currentColor); }
+}
+.brew.ring-burst { animation: cupBump .55s cubic-bezier(.2,1.4,.4,1); }
+@keyframes cupBump {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}

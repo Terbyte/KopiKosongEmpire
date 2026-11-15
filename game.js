@@ -231,7 +231,7 @@ const T = {
 };
 
 /* ---------------- state ---------------- */
-const VERSION = '2026.11.16-2';
+const VERSION = '2026.11.16-3';
 const SAVE_KEY = 'kopitiam-kosong-v2';
 const OLD_KEY = 'kopitiam-kosong-v1';
 
@@ -834,7 +834,7 @@ function renderNotices() {
   const fmtn = function (x) { return x >= 10000 ? fmt(fromNum(x)) : Math.round(x).toLocaleString('en-MY'); };
   const cands = [];
 
-  const groups = ['brew'].concat(EQ_TIERS.map(function (r) { return r[0]; }));
+  const groups = EQ_TIERS.map(function (r) { return r[0]; });
   groups.forEach(function (g) {
     const info = ladderInfo(g);
     if (!info.next) return;
@@ -869,8 +869,36 @@ function renderNotices() {
     : '<li>' + (S.lang === 'bm' ? 'Semua pencapaian dibuka!' : 'All achievements unlocked!') + '</li>';
 }
 
+let lastRingTier = -1;
+const RING_C = 2 * Math.PI * 112;   // circumference of r=112
+
+function updateRing() {
+  const brew = ACHIEVEMENTS.filter(function (a) { return a.grp === 'brew'; });
+  const done = brew.filter(function (a) { return S.ach[a.id]; }).length;
+  const next = brew.filter(function (a) { return !S.ach[a.id]; })[0];
+  const pr = next ? next.p(S) : [1, 1];
+  const pct = next ? Math.min(1, pr[0] / Math.max(pr[1], 1)) : 1;
+
+  const fill = $('ringFill');
+  const btn = $('brewBtn');
+  if (!fill || !btn) return;
+
+  fill.style.strokeDasharray = RING_C.toFixed(1);
+  fill.style.strokeDashoffset = (RING_C * (1 - pct)).toFixed(1);
+  btn.className = 'brew tier-' + Math.min(done, 8);
+
+  if (done !== lastRingTier) {
+    if (lastRingTier >= 0) {
+      btn.classList.add('ring-burst');
+      setTimeout(function () { btn.classList.remove('ring-burst'); }, 800);
+    }
+    lastRingTier = done;
+  }
+}
+
 function render() {
   $('money').textContent = fmtRM(S.money);
+  updateRing();
   $('cps').textContent = fmt(cps());
   $('clickGain').textContent = '+ ' + fmtRM(clickPower());
   renderShop();
