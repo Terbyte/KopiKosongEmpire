@@ -157,6 +157,15 @@ const BUFFS = [
 ];
 
 const BUFF_GROWTH = 1.65;   // cost multiplier per level
+const BUFF_EFF = {
+  azimat:  function (l) { return '+' + (l * 50) + '% click value'; },
+  toyol:   function (l) { return '+' + (l * 10) + '% income'; },
+  jam:     function (l) { return '+' + (l * 2) + 'h offline cap'; },
+  naga:    function (l) { return '+' + Math.min(95, l * 25) + '% offline rate'; },
+  keris:   function (l) { return '+' + (l * 25) + '% income'; },
+  bunga:   function (l) { return '+' + (l * 20) + '% income'; },
+  semangat:function (l) { return '+' + l + '% income per click'; }
+};
 function buffLevel(id) { return S.buffs[id] | 0; }
 function buffTotal() { let n = 0; for (const b of BUFFS) n += buffLevel(b.id); return n; }
 function buffCost(b) { return Math.round(b.baseCost * Math.pow(BUFF_GROWTH, buffLevel(b.id))); }
@@ -256,7 +265,7 @@ const T = {
 };
 
 /* ---------------- state ---------------- */
-const VERSION = '2026.11.16-9';
+const VERSION = '2026.11.16-10';
 const SAVE_KEY = 'kopitiam-kosong-v2';
 const OLD_KEY = 'kopitiam-kosong-v1';
 
@@ -816,6 +825,10 @@ function buyBuff(id) {
   S.beans -= cost;
   S.buffs[id] = buffLevel(id) + 1;
   sfxAch();
+  setTimeout(function () {
+    const el = $('buffcard-' + id);
+    if (el) { el.classList.add('flash'); setTimeout(function () { el.classList.remove('flash'); }, 700); }
+  }, 30);
   toast((S.lang === 'bm' ? 'Berkat naik ke L' : 'Blessing raised to L') + S.buffs[id]);
   render(); save();
 }
@@ -851,8 +864,8 @@ function renderBuffs() {
   if (guide) {
     const nextAch = ACHIEVEMENTS.filter(function (a) { return !S.ach[a.id]; }).length;
     guide.innerHTML = S.lang === 'bm'
-      ? 'Anda ada <b>' + S.beans + '</b> biji. Buka pencapaian untuk +1 setiap satu (' + nextAch + ' lagi tinggal), atau tuntut matlamat untuk +2 hingga +8.'
-      : 'You have <b>' + S.beans + '</b> beans. Unlock achievements for <b>+1</b> each (' + nextAch + ' left), or claim goals for <b>+2 to +8</b>.';
+      ? 'Anda ada <b>' + S.beans + '</b> biji. Dapat +1 setiap 1,000 bancuhan, +2 hingga +10 dari misi, dan ganjaran prestij.'
+      : 'You have <b>' + S.beans + '</b> beans. Earn <b>+1 per 1,000 brews</b>, <b>+2 to +10</b> from missions, and prestige bonuses.';
   }
   const bc = $('beanCount');
   if (bc) bc.textContent = S.beans;
@@ -863,14 +876,19 @@ function renderBuffs() {
     const lvl = buffLevel(b.id);
     const cost = buffCost(b);
     const afford = S.beans >= cost;
-    return '<div class="buff ' + (lvl > 0 ? 'owned' : '') + '">' +
-      '<div class="icon">' + b.icon + (lvl > 0 ? '<span class="lvl">L' + lvl + '</span>' : '') + '</div>' +
+    const eff = BUFF_EFF[b.id] ? BUFF_EFF[b.id](lvl) : '';
+    return '<div class="buff ' + (lvl > 0 ? 'owned' : '') + '" id="buffcard-' + b.id + '">' +
+      '<div class="icon">' + b.icon + '</div>' +
       '<div class="bn">' + (S.lang === 'bm' ? b.bm : b.en) + '</div>' +
       '<div class="bd">' + (S.lang === 'bm' ? b.bmD : b.enD) + '</div>' +
+      '<div class="beff">' + (lvl > 0
+        ? (S.lang === 'bm' ? 'Kini: ' : 'Now: ') + '<b>' + eff + '</b>'
+        : (S.lang === 'bm' ? 'Belum dimiliki' : 'Not owned')) + '</div>' +
       '<div class="bc">' +
         '<span class="cost">' + cost + ' biji</span>' +
+        '<span class="lvlchip' + (lvl > 0 ? ' on' : '') + '">Lv ' + lvl + '</span>' +
         '<button data-buff="' + b.id + '" ' + (afford ? '' : 'disabled') + '>' +
-          (lvl > 0 ? (S.lang === 'bm' ? 'NAIK' : 'LEVEL UP') : (S.lang === 'bm' ? 'BELI' : 'BUY')) +
+          (S.lang === 'bm' ? 'BELI' : 'BUY') +
         '</button>' +
       '</div>' +
     '</div>';

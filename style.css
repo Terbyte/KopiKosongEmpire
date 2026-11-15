@@ -1098,3 +1098,27 @@ footer {
 .buffstatus .bsrow.total { border-left-color: var(--kuning); background: rgba(240,180,41,.10); font-weight: 700; }
 .buffstatus .bsrow.total .v { color: #ffe9b0; }
 .buffstatus .bsrow .n i { font-style: normal; opacity: .6; font-size: 10.5px; }
+
+.buff .beff {
+  margin-top: 7px;
+  font-size: 11.5px;
+  color: #c9a97a;
+  border-top: 1px dashed rgba(122,82,48,.55);
+  padding-top: 6px;
+}
+.buff .beff b { color: var(--kuning); }
+.lvlchip {
+  font-family: monospace;
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 7px;
+  border: 1px solid #5c3a24;
+  color: #8a7050;
+}
+.lvlchip.on { border-color: var(--kuning); color: #22140a; background: var(--kuning); font-weight: 700; }
+.buff.flash { animation: buffFlash .7s ease; }
+@keyframes buffFlash {
+  0%   { box-shadow: 0 0 0 0 rgba(240,180,41,.9); transform: scale(1); }
+  35%  { box-shadow: 0 0 0 6px rgba(240,180,41,0); transform: scale(1.03); }
+  100% { box-shadow: 0 0 0 0 rgba(240,180,41,0); transform: scale(1); }
+}
