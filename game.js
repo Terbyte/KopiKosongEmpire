@@ -178,6 +178,7 @@ const T = {
 };
 
 /* ---------------- state ---------------- */
+const VERSION = '2026.11.15-3';
 const SAVE_KEY = 'kopitiam-kosong-v2';
 const OLD_KEY = 'kopitiam-kosong-v1';
 
@@ -650,6 +651,8 @@ function applyLang() {
   $('p1Title').textContent = d.p1;
   $('p2Title').textContent = d.p2;
   $('langBtn').textContent = S.lang === 'en' ? 'EN' : 'BM';
+  const vl = $('verLine');
+  if (vl) vl.textContent = 'Kopi Kosong Empire · build ' + VERSION + (S.lang === 'bm' ? ' · muat semula (Ctrl+F5) jika tidak berubah' : ' · press Ctrl+F5 if something looks stale');
   document.querySelectorAll('#langSeg button').forEach(function (b) {
     b.classList.toggle('active', b.dataset.lang === S.lang);
   });
