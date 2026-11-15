@@ -422,7 +422,17 @@ function renderShop() {
   });
 }
 
+let achSig = '';
+function achSignature() {
+  return S.lang + '|' + ACHIEVEMENTS.map(function (a) { return S.ach[a.id] ? '1' : '0'; }).join('');
+}
+function updateAchBadge() {
+  const badge = $('achBadge');
+  if (badge) badge.textContent = achCount() + '/' + ACHIEVEMENTS.length;
+}
+
 function renderAch() {
+  achSig = achSignature();
   $('achList').innerHTML = ACHIEVEMENTS.map(function (a) {
     const done = !!S.ach[a.id];
     return '<div class="ach ' + (done ? 'done' : '') + '">' +
@@ -431,8 +441,7 @@ function renderAch() {
       '<div class="st">' + (done ? '✓ ' + t().achDone : t().achNot) + '</div>' +
     '</div>';
   }).join('');
-  const badge = $('achBadge');
-  if (badge) badge.textContent = achCount() + '/' + ACHIEVEMENTS.length;
+  updateAchBadge();
 }
 
 function playtime() {
@@ -502,7 +511,8 @@ function render() {
   renderShop();
   renderPrestige();
   renderNotices();
-  if ($('panel-achievements').classList.contains('active')) renderAch();
+  updateAchBadge();
+  if ($('panel-achievements').classList.contains('active') && achSignature() !== achSig) renderAch();
   if ($('panel-stats').classList.contains('active')) renderStats();
 }
 
