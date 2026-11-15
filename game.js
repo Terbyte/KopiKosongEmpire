@@ -158,6 +158,7 @@ const BUFFS = [
 
 const BUFF_GROWTH = 1.65;   // cost multiplier per level
 function buffLevel(id) { return S.buffs[id] | 0; }
+function buffTotal() { let n = 0; for (const b of BUFFS) n += buffLevel(b.id); return n; }
 function buffCost(b) { return Math.round(b.baseCost * Math.pow(BUFF_GROWTH, buffLevel(b.id))); }
 
 
@@ -172,6 +173,18 @@ const GOALS = [
   { id: 'g_k50',      en: 'Own 50 kettles',           bm: 'Miliki 50 cerek',         reward: 5, ok: s => s.counts.cerek >= 50, p: s => [s.counts.cerek, 50] },
   { id: 'g_tok10',    en: 'Reach 10 Warung Tokens',   bm: 'Capai 10 Warung Token',   reward: 6, ok: s => s.tokens >= 10,   p: s => [s.tokens, 10] },
   { id: 'g_rm10m',    en: 'Earn RM 10 million',       bm: 'Peroleh RM 10 juta',      reward: 8, ok: s => s.lifetime.e >= 7, p: s => [Math.min(val(s.lifetime), 1e7), 1e7] },
+
+  // ---- extended set ----
+  { id: 'g_brew2500', en: 'Brew 2,500 cups',          bm: 'Bancuh 2,500 cawan',      reward: 6, ok: s => s.clicks >= 2500, p: s => [s.clicks, 2500] },
+  { id: 'g_k100',     en: 'Own 100 kettles',          bm: 'Miliki 100 cerek',        reward: 6, ok: s => s.counts.cerek >= 100, p: s => [s.counts.cerek, 100] },
+  { id: 'g_rm1m',     en: 'Earn RM 1 million',        bm: 'Peroleh RM 1 juta',       reward: 6, ok: s => s.lifetime.e >= 6, p: s => [Math.min(val(s.lifetime), 1e6), 1e6] },
+  { id: 'g_ach20',    en: 'Unlock 20 achievements',   bm: 'Buka 20 pencapaian',      reward: 6, ok: s => achCount() >= 20, p: s => [achCount(), 20] },
+  { id: 'g_buff3',    en: 'Reach 3 buff levels',      bm: 'Capai 3 level berkat',    reward: 5, ok: s => buffTotal() >= 3, p: s => [buffTotal(), 3] },
+  { id: 'g_ads5',     en: 'Watch 5 ads',              bm: 'Tonton 5 iklan',          reward: 4, ok: s => (s.adsTotal || 0) >= 5, p: s => [s.adsTotal || 0, 5] },
+  { id: 'g_all5',     en: 'Own 5 of every building',  bm: 'Miliki 5 setiap bangunan', reward: 8, ok: s => BUILDINGS.every(b => s.counts[b.id] >= 5), p: s => [BUILDINGS.filter(b => s.counts[b.id] >= 5).length, BUILDINGS.length] },
+  { id: 'g_brew10k',  en: 'Brew 10,000 cups',         bm: 'Bancuh 10,000 cawan',     reward: 10, ok: s => s.clicks >= 10000, p: s => [s.clicks, 10000] },
+  { id: 'g_tok50',    en: 'Hold 50 Warung Tokens',    bm: 'Pegang 50 Warung Token',  reward: 10, ok: s => s.tokens >= 50, p: s => [s.tokens, 50] },
+  { id: 'g_p5',       en: 'Prestige 5 times',         bm: 'Prestij 5 kali',          reward: 8, ok: s => s.prestiges >= 5, p: s => [s.prestiges, 5] },
 ];
 
 /* ---------------- i18n ---------------- */
@@ -243,7 +256,7 @@ const T = {
 };
 
 /* ---------------- state ---------------- */
-const VERSION = '2026.11.16-8';
+const VERSION = '2026.11.16-9';
 const SAVE_KEY = 'kopitiam-kosong-v2';
 const OLD_KEY = 'kopitiam-kosong-v1';
 
@@ -262,6 +275,7 @@ let S = {
   adsToday: 0,
   brewBeans: 0,
   adsDate: '',
+  adsTotal: 0,
   purchases: [],
   goals: {},
   soundOn: true,
@@ -663,6 +677,7 @@ function watchAd() {
       clearInterval(iv);
       bar.style.width = '0%';
       S.adsToday++;
+      S.adsTotal = (S.adsTotal || 0) + 1;
       const m = Math.min(50, 5 * S.adsToday);
       S.boostMult = m;
       S.boostUntil = Date.now() + 2 * 3600 * 1000;
@@ -711,6 +726,7 @@ function load() {
     S.boostMult = d.boostMult || 1;
     S.adsToday = d.adsToday | 0;
     S.adsDate = d.adsDate || '';
+    S.adsTotal = d.adsTotal | 0;
     S.brewBeans = d.brewBeans | 0;
     S.purchases = d.purchases || [];
     S.startedAt = d.startedAt || Date.now();
@@ -817,6 +833,11 @@ function claimGoal(id) {
 let lastStoreSig = '';
 function storeSig() { return S.lang + '|' + adsLeft() + '|' + (boostActive() ? Math.round(S.boostUntil / 60000) : 0); }
 
+let lastMissionSig = '';
+function missionSig() {
+  return S.lang + '|' + activeGoals().map(function (g) { return g.id + (g.ok(S) ? '1' : '0'); }).join(',');
+}
+
 let buffSig = '';
 function buffSignature() {
   const goals = activeGoals().map(function (g) { return g.id + (g.ok(S) ? '1' : '0'); }).join(',');
@@ -855,6 +876,10 @@ function renderBuffs() {
     '</div>';
   }).join('');
 
+}
+
+function renderMissions() {
+  lastMissionSig = missionSig();
   const goals = activeGoals();
   $('goalList').innerHTML = goals.length ? goals.map(function (g) {
     const pr = g.p(S);
@@ -950,6 +975,23 @@ function renderStats() {
     [t().sClicks, S.clicks.toLocaleString('en-MY')],
     [t().sPlaytime, playtime()],
   ];
+  const bk = $('multBreak');
+  if (bk) {
+    const parts = [
+      [S.lang === 'bm' ? 'Warung Token' : 'Warung Tokens', S.tokens, '+' + (S.tokens * 10) + '%', 'x' + (1 + S.tokens * 0.1).toFixed(2)],
+      [S.lang === 'bm' ? 'Bintang Francais' : 'Franchise Stars', S.bintang, '+' + (S.bintang * 50) + '%', 'x' + (1 + S.bintang * 0.5).toFixed(2)],
+      [S.lang === 'bm' ? 'Pencapaian' : 'Achievements', achCount(), '+' + achBonus().toFixed(2).replace('.00','') + '%', 'x' + (1 + achBonus() / 100).toFixed(2)],
+      [S.lang === 'bm' ? 'Berkat' : 'Buffs', buffTotal(), '', 'x' + buffIncomeMult().toFixed(2)],
+      [S.lang === 'bm' ? 'Iklan' : 'Ad boost', boostActive() ? 1 : 0, '', boostActive() ? 'x' + (S.boostMult || 1) : 'x1'],
+    ];
+    bk.innerHTML = parts.map(function (p) {
+      return '<div class="bsrow ' + (p[1] > 0 ? 'active' : 'off') + '">' +
+        '<span class="n">' + p[0] + (p[2] ? ' <i>' + p[2] + '</i>' : '') + '</span>' +
+        '<span class="v">' + p[3] + '</span></div>';
+    }).join('') + '<div class="bsrow total"><span class="n">' + (S.lang === 'bm' ? 'JUMLAH' : 'TOTAL') +
+      '</span><span class="v">x' + mult().toFixed(2) + '</span></div>';
+  }
+
   const bs = $('buffStatus');
   if (bs) {
     bs.innerHTML = BUFFS.map(function (b) {
@@ -1069,6 +1111,7 @@ function render() {
   updateAchBadge();
   if ($('panel-achievements').classList.contains('active') && achSignature() !== achSig) renderAch();
   if ($('panel-buffs').classList.contains('active') && buffSignature() !== buffSig) renderBuffs();
+  if ($('panel-mission').classList.contains('active') && missionSig() !== lastMissionSig) renderMissions();
   if ($('panel-shop').classList.contains('active') && storeSig() !== lastStoreSig) renderStore();
   if ($('panel-stats').classList.contains('active')) renderStats();
 }
@@ -1172,6 +1215,7 @@ function init() {
     if (btn.dataset.tab === 'achievements') renderAch();
     if (btn.dataset.tab === 'stats') renderStats();
     if (btn.dataset.tab === 'buffs') renderBuffs();
+    if (btn.dataset.tab === 'mission') renderMissions();
     if (btn.dataset.tab === 'shop') renderStore();
     sfxTap();
   });

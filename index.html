@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
 <title>Kopi Kosong Empire — Kopitiam Idle Game</title>
-<link rel="stylesheet" href="style.css?v=2026.11.16-8" />
+<link rel="stylesheet" href="style.css?v=2026.11.16-9" />
 </head>
 <body>
 
@@ -37,6 +37,7 @@
 
 <nav class="tabs" id="tabs">
   <button data-tab="brew" class="active" id="tabShop">Brew</button>
+  <button data-tab="mission" id="tabMission">Missions</button>
   <button data-tab="achievements" id="tabAch">Achievements <span class="badge" id="achBadge">0</span></button>
   <button data-tab="shop" id="tabStore">Shop</button>
   <button data-tab="buffs" id="tabBuffs">Buffs <span class="badge" id="beanBadge">0</span></button>
@@ -109,7 +110,7 @@
 
     <div class="card">
       <h2 id="adTitle">Watch an ad — 2× income</h2>
-      <p class="muted" id="adSub">Each ad gives a 2× multiplier for 2 hours. Maximum 10 per day.</p>
+      <p class="muted" id="adSub">Each ad adds ×5 to your income multiplier for 2 hours — the 1st gives ×5, the 2nd ×10, up to ×50 on the 10th. Resets daily.</p>
       <div class="adbox">
         <div class="adstat"><span id="adLeft">10</span> <span id="adLeftLabel">ads left today</span></div>
         <div class="adstat" id="boostState">No active boost</div>
@@ -139,11 +140,14 @@
       <p class="guide" id="buffGuide"></p>
       <div id="buffList" class="buffgrid"></div>
     </div>
+  </section>
+
+  <section class="panel" id="panel-mission">
     <div class="card">
-      <h2 id="goalTitle">Concurrent Aims</h2>
-      <p class="muted" id="goalSub">Three goals at a time. Claim the reward, the next one appears.</p>
+      <h2 id="goalTitle">Missions</h2>
+      <p class="muted" id="goalSub">Three missions run at once. Claim a reward and the next one appears.</p>
       <div id="goalList" class="goallist"></div>
-      <p class="guide" id="goalGuide">Three goals run at once. Claim a reward and the next goal appears automatically.</p>
+      <p class="guide" id="goalGuide">Claim a reward and the next mission appears automatically. Rewards are paid in Biji Kopi.</p>
     </div>
   </section>
 
@@ -151,6 +155,9 @@
     <div class="card">
       <h2 id="statsTitle">Statistics</h2>
       <div class="statgrid" id="statGrid"></div>
+      <h3 class="subhead" id="multHead">Where your multiplier comes from</h3>
+      <div id="multBreak" class="buffstatus"></div>
+
       <h3 class="subhead" id="buffHead">Permanent buffs</h3>
       <div id="buffStatus" class="buffstatus"></div>
     </div>
@@ -278,6 +285,6 @@
 
 <div id="toast" class="toast"></div>
 
-<script src="game.js?v=2026.11.16-8"></script>
+<script src="game.js?v=2026.11.16-9"></script>
 </body>
 </html>
