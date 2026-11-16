@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
 <title>Kopi Kosong Empire — Kopitiam Idle Game</title>
-<link rel="stylesheet" href="style.css?v=2026.11.16-26" />
+<link rel="stylesheet" href="style.css?v=2026.11.16-27" />
 </head>
 <body>
 
@@ -44,6 +44,8 @@
   <button data-tab="stats" id="tabStats">Stats</button>
   <button data-tab="settings" id="tabSet">Settings</button>
 </nav>
+
+<div class="dailybar" id="dailyBar"></div>
 
 <main>
   <section class="panel active" id="panel-brew">
@@ -110,12 +112,12 @@
     </div>
 
     <div class="card">
-      <h2 id="adTitle">Watch an ad — 2× income</h2>
-      <p class="muted" id="adSub">Each ad adds ×5 to your income multiplier for 2 hours — the 1st gives ×5, the 2nd ×10, up to ×50 on the 10th. Resets daily.</p>
+      <h2 id="adTitle">Coffee Break — free income boost</h2>
+      <p class="muted" id="adSub">Take a 5-second break and your income multiplies ×5 for 2 hours. The 1st gives ×5, the 2nd ×10, up to ×50 on the 10th. Resets daily.</p>
       <div class="adbox">
-        <div class="adstat"><span id="adLeft">10</span> <span id="adLeftLabel">ads left today</span></div>
+        <div class="adstat"><span id="adLeft">10</span> <span id="adLeftLabel">breaks left today</span></div>
         <div class="adstat" id="boostState">No active boost</div>
-        <button id="watchAdBtn" class="btn gold">Watch ad</button>
+        <button id="watchAdBtn" class="btn gold">Take a break</button>
       </div>
       <div class="adbar"><i id="adProgress"></i></div>
     </div>
@@ -342,6 +344,6 @@
 </div>
 <div id="toast" class="toast"></div>
 
-<script src="game.js?v=2026.11.16-26"></script>
+<script src="game.js?v=2026.11.16-27"></script>
 </body>
 </html>

@@ -270,7 +270,9 @@ const T = {
 };
 
 /* ---------------- state ---------------- */
-const VERSION = '2026.11.16-26';
+const SHOW_STORE = false;   // fake IAP is hidden in the public/itch build
+
+const VERSION = '2026.11.16-27';
 const SAVE_KEY = 'kopitiam-kosong-v2';
 const OLD_KEY = 'kopitiam-kosong-v1';
 
@@ -296,6 +298,8 @@ let S = {
   lang: 'en',
   startedAt: Date.now(),
    finished: false,
+  dailyDate: '',
+  dailyStreak: 0,
   allEarned: { m: 0, e: 0 },
   finishedAt: 0,
   lastSeen: Date.now(),
@@ -654,6 +658,58 @@ const STORE = [
   { id: 'pack_xl', icon: '\ud83c\udf92', en: 'Sack of Beans',   bm: 'Guni Biji',       price: 'RM 60', beans: 700 },
 ];
 
+function dayKey(d) { return (d || new Date()).toISOString().slice(0, 10); }
+
+function dailyInfo() {
+  const today = dayKey();
+  const last = S.dailyDate || '';
+  const claimedToday = last === today;
+  const yest = new Date(Date.now() - 864e5);
+  const continued = last === dayKey(yest);
+  const streak = claimedToday ? S.dailyStreak : (continued ? S.dailyStreak : 0);
+  const nextStreak = claimedToday ? streak : (continued ? streak + 1 : 1);
+  return { claimedToday, streak, nextStreak, reward: Math.min(10, 1 + nextStreak) };
+}
+
+function claimDaily() {
+  const info = dailyInfo();
+  if (info.claimedToday) return;
+  S.dailyDate = dayKey();
+  S.dailyStreak = info.nextStreak;
+  S.beans += info.reward;
+  try { SFX.cawangan(); } catch (e) {}
+  toast('☕ +' + info.reward + ' Biji Kopi · ' +
+        (S.lang === 'bm' ? 'rentetan ' + S.dailyStreak + ' hari' : 'day ' + S.dailyStreak + ' streak'));
+  render(); save();
+}
+
+let lastDailySig = '';
+function renderDaily() {
+  const bar = $('dailyBar');
+  if (!bar) return;
+  const i = dailyInfo();
+  const sig = S.lang + '|' + i.claimedToday + '|' + S.dailyStreak + '|' + i.reward;
+  if (sig === lastDailySig) return;   // rebuild only on change, never on every frame
+  lastDailySig = sig;
+  if (i.claimedToday) {
+    bar.className = 'dailybar show claimed';
+    bar.innerHTML = '<div class="dleft"><span class="dicon">☕</span><span>' +
+      (S.lang === 'bm' ? 'Kopi harian dituntut' : 'Daily kopi claimed') +
+      '<span class="dsub">' +
+      (S.lang === 'bm' ? 'Rentetan ' : 'Streak ') + S.dailyStreak + ' · ' +
+      (S.lang === 'bm' ? 'kembali esok untuk +' : 'come back tomorrow for +') +
+      Math.min(10, 1 + S.dailyStreak + 1) + ' 🫘</span></span></div>';
+    return;
+  }
+  bar.className = 'dailybar show';
+  bar.innerHTML = '<div class="dleft"><span class="dicon">☕</span><span>' +
+    (S.lang === 'bm' ? 'Kopi harian — hari ' : 'Daily kopi — day ') + i.nextStreak +
+    '<span class="dsub">' + (S.lang === 'bm' ? 'Percuma setiap hari. Rentetan lebih besar, ganjaran lebih besar.' : 'Free every day. Longer streak, bigger reward.') + '</span></span></div>' +
+    '<button id="dailyClaim">+' + i.reward + ' 🫘 ' + (S.lang === 'bm' ? 'TUNTUT' : 'CLAIM') + '</button>';
+  const btn = $('dailyClaim');
+  if (btn) btn.addEventListener('click', claimDaily);
+}
+
 function adsLeft() {
   const today = new Date().toISOString().slice(0, 10);
   if (S.adsDate !== today) { S.adsDate = today; S.adsToday = 0; }
@@ -661,6 +717,7 @@ function adsLeft() {
 }
 
 function renderStore() {
+  if (!SHOW_STORE || !$('storeItems')) return;
   lastStoreSig = storeSig();
   adsLeft();
   $('storeItems').innerHTML = STORE.map(function (p) {
@@ -754,6 +811,8 @@ function load() {
     S.purchases = d.purchases || [];
     S.startedAt = d.startedAt || Date.now();
     S.finished = !!d.finished;
+    S.dailyDate = d.dailyDate || '';
+    S.dailyStreak = d.dailyStreak | 0;
     S.allEarned = d.allEarned || { m: 0, e: 0 };
     S.finishedAt = d.finishedAt || 0;
     S.counts = Object.assign({}, d.counts);
@@ -1461,13 +1520,15 @@ function render() {
   updateAchBadge();
   updateMissionBadge();
   renderEmpayar();
+  renderDaily();
   checkFinish();
   checkPrestigePopup();
   checkMissionPopups();
   if ($('panel-achievements').classList.contains('active') && achSignature() !== achSig) renderAch();
   if ($('panel-buffs').classList.contains('active') && buffSignature() !== buffSig) renderBuffs();
   if ($('panel-mission').classList.contains('active') && missionSig() !== lastMissionSig) renderMissions();
-  if ($('panel-shop').classList.contains('active') && storeSig() !== lastStoreSig) renderStore();
+  const shopPanel = $('panel-shop');
+  if (shopPanel && shopPanel.classList.contains('active') && storeSig() !== lastStoreSig) renderStore();
   if ($('panel-stats').classList.contains('active')) renderStats();
 }
 
@@ -1570,6 +1631,13 @@ function init() {
   bindPrestigePopup();
   const hadSave = load();
   applyLang();
+
+  if (!SHOW_STORE) {
+    const tbtn = document.querySelector('#tabs button[data-tab="shop"]');
+    const tpanel = $('panel-shop');
+    if (tbtn) tbtn.remove();
+    if (tpanel) tpanel.remove();
+  }
 
   $('brewBtn').addEventListener('click', function (e) { audio(); brew(e); });
 
@@ -1685,8 +1753,10 @@ function init() {
   $('soundToggle').addEventListener('click', toggleSound);
 
   $('claimOffline').addEventListener('click', claimOffline);
-  $('watchAdBtn').addEventListener('click', watchAd);
-  $('storeItems').addEventListener('click', function (e) {
+  const adBtn = $('watchAdBtn');
+  if (adBtn) adBtn.addEventListener('click', watchAd);
+  const storeEl = $('storeItems');
+  if (storeEl) storeEl.addEventListener('click', function (e) {
     const btn = e.target.closest('button[data-pack]');
     if (btn) buyPack(btn.dataset.pack);
   });

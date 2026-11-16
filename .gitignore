@@ -4,3 +4,5 @@ package-lock.json
 *.log
 pt10.js
 ptlong.js
+dist/
+*.zip
