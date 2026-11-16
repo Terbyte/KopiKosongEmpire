@@ -245,7 +245,7 @@ history is authored as `Terbyte <terbyte@users.noreply.github.com>`.
 ## Credits
 
 **Created by** Terbyte
-**Built with** Hermes Agent
+**Built with** Aita
 
 Kopi Kosong Empire · Malaysia · 2026
 
