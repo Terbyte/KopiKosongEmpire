@@ -270,7 +270,7 @@ const T = {
 };
 
 /* ---------------- state ---------------- */
-const VERSION = '2026.11.16-25';
+const VERSION = '2026.11.16-26';
 const SAVE_KEY = 'kopitiam-kosong-v2';
 const OLD_KEY = 'kopitiam-kosong-v1';
 
@@ -1542,6 +1542,21 @@ function loop(now) {
 
   saveTimer += dt;
   if (saveTimer > 5) { saveTimer = 0; save(); checkAchievements(); }
+  const topbar = document.querySelector('.topbar');
+  function syncHeader() {
+    if (!topbar) return;
+    topbar.classList.toggle('compact', window.scrollY > 34);
+    const hh = topbar.offsetHeight;
+    const tabsEl = document.querySelector('.tabs');
+    document.documentElement.style.setProperty('--hdr', hh + 'px');
+    document.documentElement.style.setProperty('--chrome', (hh + (tabsEl ? tabsEl.offsetHeight : 0)) + 'px');
+  }
+  window.addEventListener('scroll', syncHeader, { passive: true });
+  window.addEventListener('resize', syncHeader);
+  window.addEventListener('orientationchange', function () { setTimeout(syncHeader, 220); });
+  syncHeader();
+  setTimeout(syncHeader, 300);
+
   render();
   if (pendingOffline) setTimeout(showOffline, 600);
   requestAnimationFrame(loop);
@@ -1577,6 +1592,9 @@ function init() {
     if (btn.dataset.tab === 'buffs') renderBuffs();
     if (btn.dataset.tab === 'mission') renderMissions();
     if (btn.dataset.tab === 'shop') renderStore();
+    // keep the tapped tab on screen and start the new panel at the top
+    try { btn.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'auto' }); } catch (e) {}
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
     sfxTap();
   });
 
@@ -1807,6 +1825,21 @@ function init() {
   if (!hadSave) {
     setTimeout(showWelcome, 350);
   }
+
+  const topbar = document.querySelector('.topbar');
+  function syncHeader() {
+    if (!topbar) return;
+    topbar.classList.toggle('compact', window.scrollY > 34);
+    const hh = topbar.offsetHeight;
+    const tabsEl = document.querySelector('.tabs');
+    document.documentElement.style.setProperty('--hdr', hh + 'px');
+    document.documentElement.style.setProperty('--chrome', (hh + (tabsEl ? tabsEl.offsetHeight : 0)) + 'px');
+  }
+  window.addEventListener('scroll', syncHeader, { passive: true });
+  window.addEventListener('resize', syncHeader);
+  window.addEventListener('orientationchange', function () { setTimeout(syncHeader, 220); });
+  syncHeader();
+  setTimeout(syncHeader, 300);
 
   render();
   if (pendingOffline) setTimeout(showOffline, 600);
