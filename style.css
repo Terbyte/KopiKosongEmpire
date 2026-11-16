@@ -1300,3 +1300,56 @@ footer {
   flex: 0 0 auto; background: none; border: none; color: #8a7248;
   font-size: 18px; line-height: 1; cursor: pointer; padding: 0 2px;
 }
+
+/* ---------------- welcome / first run ---------------- */
+.welwrap {
+  position: fixed; inset: 0; z-index: 95; display: none;
+  align-items: center; justify-content: center; padding: 18px;
+  background: radial-gradient(circle at 50% 25%, rgba(58,32,8,.97), rgba(10,6,3,.99));
+  overflow-y: auto;
+}
+.welwrap.show { display: flex; animation: endFade .45s ease both; }
+.welcard {
+  width: 100%; max-width: 430px; text-align: left;
+  background: linear-gradient(180deg, #241408, #150b05);
+  border: 1px solid rgba(240,180,41,.4); border-radius: 18px;
+  padding: 24px 22px 18px;
+  box-shadow: 0 0 50px rgba(240,180,41,.15);
+  animation: endRise .6s cubic-bezier(.2,.9,.25,1) both;
+}
+.welkicker {
+  font-family: monospace; font-size: 10px; letter-spacing: .3em;
+  color: var(--kuning); margin-bottom: 7px;
+}
+.weltitle {
+  margin: 0 0 10px; font-size: 24px; line-height: 1.15; color: #ffe6a8;
+  text-shadow: 0 0 24px rgba(240,180,41,.4);
+}
+.welnote { margin: 0 0 13px; font-size: 13px; line-height: 1.6; color: #d8c2a0; }
+.welgoal {
+  font-size: 12.5px; line-height: 1.5; color: #ffe6a8;
+  background: rgba(240,180,41,.09); border-left: 3px solid var(--kuning);
+  border-radius: 0 8px 8px 0; padding: 9px 11px; margin-bottom: 14px;
+}
+.welsteps { list-style: none; margin: 0 0 18px; padding: 0; }
+.welsteps li {
+  display: flex; gap: 9px; align-items: flex-start;
+  font-size: 12px; line-height: 1.5; color: #c4ad89; margin-bottom: 9px;
+}
+.welsteps li b {
+  flex: 0 0 auto; width: 17px; height: 17px; border-radius: 50%;
+  background: rgba(240,180,41,.16); border: 1px solid rgba(240,180,41,.45);
+  color: #ffd97a; font-size: 10px; font-family: monospace;
+  display: flex; align-items: center; justify-content: center; margin-top: 1px;
+}
+.welcard button#welStart {
+  width: 100%; padding: 13px; border: none; border-radius: 11px; cursor: pointer;
+  background: linear-gradient(180deg, #f0b429, #c98a12); color: #2a1500;
+  font-weight: 800; font-size: 14px; letter-spacing: .04em;
+  box-shadow: 0 8px 24px rgba(240,180,41,.3);
+}
+.welcard button#welStart:active { transform: translateY(1px); }
+.welfoot {
+  margin-top: 11px; text-align: center; font-size: 10px; color: #6f5b3f;
+  font-family: monospace;
+}

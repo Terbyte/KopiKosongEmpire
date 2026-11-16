@@ -270,7 +270,7 @@ const T = {
 };
 
 /* ---------------- state ---------------- */
-const VERSION = '2026.11.16-24';
+const VERSION = '2026.11.16-25';
 const SAVE_KEY = 'kopitiam-kosong-v2';
 const OLD_KEY = 'kopitiam-kosong-v1';
 
@@ -842,7 +842,7 @@ const END_TXT = {
     beans: 'biji kopi', franchises: 'franchises', played: 'time played',
     thanks: 'Thank you for playing. Every tap you gave this little shop kept the lights on — <em>terima kasih kerana menyokong kedai kecil ini.</em> If you made it this far, you are the reason it stayed open.',
     role1: 'CREATED BY', who1: 'Terbyte',
-    role2: 'BUILT WITH', who2: 'Hermes Agent',
+    role2: 'BUILT WITH', who2: 'Aita',
     foot: 'Kopi Kosong Empire · Malaysia · 2026',
     cont: 'Continue — Empayar Mode',
     empayar: 'EMPAYAR', empTxt: 'franchises to a true empire',
@@ -856,7 +856,7 @@ const END_TXT = {
     beans: 'biji kopi', franchises: 'francais', played: 'masa bermain',
     thanks: 'Terima kasih kerana bermain. Setiap ketukan anda menghidupkan kedai kecil ini — <em>thank you for staying until the last cup.</em> Kalau anda sampai sejauh ini, andalah sebab kedai ini masih buka.',
     role1: 'DICIPTA OLEH', who1: 'Terbyte',
-    role2: 'DIBINA DENGAN', who2: 'Hermes Agent',
+    role2: 'DIBINA DENGAN', who2: 'Aita',
     foot: 'Kopi Kosong Empire · Malaysia · 2026',
     cont: 'Teruskan — Mod Empayar',
     empayar: 'EMPAYAR', empTxt: 'francais menuju empayar sebenar',
@@ -876,6 +876,63 @@ function checkFinish() {
     S.finishedAt = Date.now();
     showEnding();
   }
+}
+
+const WEL = {
+  en: {
+    kicker: 'SELAMAT DATANG',
+    title: 'Kopi Kosong Empire',
+    note: 'A small kedai kopi, one hot cup, and a rainy afternoon in Malaysia. This shop is yours now — take it from a single kettle to a name in every state.',
+    goal: '🎯 Your goal: own your first Francais Kebangsaan.',
+    steps: [
+      ['1', 'Tap the cup to brew. The ring around it shows the next tier.'],
+      ['2', 'Spend your RM on outlets — each one earns while you do nothing.'],
+      ['3', 'Claim Missions for Biji Kopi, then spend them on mystic buffs.'],
+      ['4', 'At RM 120,000, do Balik Kampung: reset for permanent +10% and go further.']
+    ],
+    start: 'START BREWING',
+    foot: 'Kopi Kosong Empire · build ' 
+  },
+  bm: {
+    kicker: 'SELAMAT DATANG',
+    title: 'Kopi Kosong Empire',
+    note: 'Sebuah kedai kopi kecil, secawan panas, dan petang hujan di Malaysia. Kedai ini milik anda sekarang — bawa dari satu cerek sehingga namanya dikenali di setiap negeri.',
+    goal: '🎯 Matlamat anda: miliki Francais Kebangsaan pertama anda.',
+    steps: [
+      ['1', 'Ketik cawan untuk membancuh. Bulatan di sekelilingnya menunjukkan tahap seterusnya.'],
+      ['2', 'Belanja RM anda pada kedai — setiap satu menjana pendapatan tanpa anda buat apa-apa.'],
+      ['3', 'Tuntut Misi untuk Biji Kopi, kemudian belanja pada berkat mistik.'],
+      ['4', 'Pada RM 120,000, buat Balik Kampung: reset untuk +10% kekal dan pergi lebih jauh.']
+    ],
+    start: 'MULA MEMBANCUH',
+    foot: 'Kopi Kosong Empire · binaan '
+  }
+};
+
+function showWelcome() {
+  const x = WEL[S.lang] || WEL.en;
+  const wrap = $('welWrap');
+  if (!wrap) return;
+  $('welKicker').textContent = x.kicker;
+  $('welTitle').textContent = x.title;
+  $('welNote').textContent = x.note;
+  $('welGoal').textContent = x.goal;
+  $('welSteps').innerHTML = x.steps.map(function (st) {
+    return '<li><b>' + st[0] + '</b><span>' + st[1] + '</span></li>';
+  }).join('');
+  $('welStart').textContent = x.start;
+  $('welFoot').textContent = x.foot + VERSION;
+  wrap.classList.add('show');
+}
+
+function bindWelcome() {
+  const btn = $('welStart');
+  if (btn) btn.addEventListener('click', function () {
+    $('welWrap').classList.remove('show');
+    S.welcomed = true;
+    save();                       // persist first - audio must never block it
+    try { audio(); sfxTap(); } catch (e) {}
+  });
 }
 
 function showEnding() {
@@ -1493,6 +1550,7 @@ function loop(now) {
 /* ---------------- wiring ---------------- */
 function init() {
   bindEnding();
+  bindWelcome();
   bindMissionPopup();
   bindPrestigePopup();
   const hadSave = load();
@@ -1746,7 +1804,9 @@ function init() {
   document.addEventListener('dblclick', function (e) { e.preventDefault(); }, { passive: false });
   document.addEventListener('visibilitychange', function () { if (document.hidden) save(); });
 
-  if (!hadSave) setTimeout(function () { toast(t().toastWelcome); }, 700);
+  if (!hadSave) {
+    setTimeout(showWelcome, 350);
+  }
 
   render();
   if (pendingOffline) setTimeout(showOffline, 600);
