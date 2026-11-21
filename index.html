@@ -4,7 +4,16 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
 <title>Kopi Kosong Empire — Kopitiam Idle Game</title>
-<link rel="stylesheet" href="style.css?v=2026.11.16-27" />
+<link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#3a2418" />
+<meta name="color-scheme" content="dark" />
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png" />
+<link rel="apple-touch-icon" href="icons/apple-touch-icon-180.png" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Kopi Kosong" />
+<link rel="stylesheet" href="style.css?v=2026.11.18-1" />
 </head>
 <body>
 
@@ -342,8 +351,29 @@
     <div class="endfoot" id="endFoot"></div>
   </div>
 </div>
+<div class="installbar" id="installBar" role="dialog" aria-label="Add to home screen">
+  <div class="ibicon">☕</div>
+  <div class="ibtxt">
+    <b id="ibTitle">Add to your home screen</b>
+    <span id="ibSub">Play full screen, no browser bar</span>
+  </div>
+  <button class="ibadd" id="ibAdd">ADD</button>
+  <button class="ibx" id="ibClose" aria-label="Not now">×</button>
+</div>
+
+<div class="iossheet" id="iosSheet">
+  <div class="ioscard">
+    <div class="iostitle" id="iosTitle">Add to Home Screen</div>
+    <ol class="iossteps" id="iosSteps">
+      <li>Tap the <b>Share</b> button <span class="iosglyph">􀈂</span> in Safari's toolbar</li>
+      <li>Scroll down and tap <b>Add to Home Screen</b></li>
+      <li>Tap <b>Add</b> — Kopi Kosong opens full screen</li>
+    </ol>
+    <button class="iosok" id="iosOk">Got it</button>
+  </div>
+</div>
 <div id="toast" class="toast"></div>
 
-<script src="game.js?v=2026.11.16-27"></script>
+<script src="game.js?v=2026.11.18-1"></script>
 </body>
 </html>

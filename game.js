@@ -272,7 +272,7 @@ const T = {
 /* ---------------- state ---------------- */
 const SHOW_STORE = false;   // fake IAP is hidden in the public/itch build
 
-const VERSION = '2026.11.16-27';
+const VERSION = '2026.11.18-1';
 const SAVE_KEY = 'kopitiam-kosong-v2';
 const OLD_KEY = 'kopitiam-kosong-v1';
 
@@ -1563,6 +1563,7 @@ function applyLang() {
   $('p1Title').textContent = d.p1;
   $('p2Title').textContent = d.p2;
   $('langBtn').textContent = S.lang === 'en' ? 'EN' : 'BM';
+  if (typeof renderInstallText === 'function') renderInstallText();
   const vl = $('verLine');
   if (vl) {
     let stamp = '';
@@ -1624,9 +1625,162 @@ function loop(now) {
 }
 
 /* ---------------- wiring ---------------- */
+/* ---------------- Add to Home Screen (PWA) ---------------- */
+const INSTALL_TXT = {
+  en: {
+    title: 'Add to your home screen', sub: 'Full screen, no browser bar', add: 'ADD',
+    iosTitle: 'Add to Home Screen', iosOk: 'Got it',
+    steps: [
+      'Tap the <b>Share</b> button at the bottom of Safari',
+      'Scroll down and tap <b>Add to Home Screen</b>',
+      'Tap <b>Add</b> — Kopi Kosong opens full screen, no browser bar'
+    ],
+    hint: 'Open your browser menu and choose “Add to Home screen”.'
+  },
+  bm: {
+    title: 'Tambah ke skrin utama', sub: 'Skrin penuh, tanpa bar pelayar', add: 'TAMBAH',
+    iosTitle: 'Tambah ke Skrin Utama', iosOk: 'Faham',
+    steps: [
+      'Tekan butang <b>Kongsi</b> di bawah Safari',
+      'Tatal ke bawah dan tekan <b>Tambah ke Skrin Utama</b>',
+      'Tekan <b>Tambah</b> — Kopi Kosong terbuka skrin penuh'
+    ],
+    hint: 'Buka menu pelayar dan pilih “Tambah ke skrin utama”.'
+  }
+};
+
+const INSTALL_KEY = 'kke-install';
+
+function installMeta() {
+  try { return JSON.parse(localStorage.getItem(INSTALL_KEY) || '{}') || {}; } catch (e) { return {}; }
+}
+function setInstallMeta(patch) {
+  try {
+    const m = installMeta();
+    Object.assign(m, patch);
+    localStorage.setItem(INSTALL_KEY, JSON.stringify(m));
+  } catch (e) {}
+}
+function runningStandalone() {
+  return window.matchMedia('(display-mode: standalone)').matches ||
+         window.matchMedia('(display-mode: fullscreen)').matches ||
+         window.navigator.standalone === true;
+}
+function isIOSDevice() {
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+         (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+
+let deferredInstallPrompt = null;
+let installBarShown = false;
+
+function renderInstallText() {
+  const x = INSTALL_TXT[S.lang] || INSTALL_TXT.en;
+  if ($('ibTitle')) $('ibTitle').textContent = x.title;
+  if ($('ibSub')) $('ibSub').textContent = x.sub;
+  if ($('ibAdd')) $('ibAdd').textContent = x.add;
+  if ($('iosTitle')) $('iosTitle').textContent = x.iosTitle;
+  if ($('iosOk')) $('iosOk').textContent = x.iosOk;
+  const list = $('iosSteps');
+  if (list) {
+    while (list.firstChild) list.removeChild(list.firstChild);
+    x.steps.forEach(function (html) {
+      const li = document.createElement('li');
+      li.innerHTML = html;
+      list.appendChild(li);
+    });
+  }
+}
+
+function showInstallBar() {
+  const bar = $('installBar');
+  if (!bar || runningStandalone() || installBarShown) return;
+  const meta = installMeta();
+  if (meta.installed) return;
+  if (meta.dismissedAt && Date.now() - meta.dismissedAt < 14 * 864e5) return;
+  renderInstallText();
+  bar.classList.add('show');
+  document.body.classList.add('hasinstall');
+  installBarShown = true;
+}
+
+function hideInstallBar() {
+  const bar = $('installBar');
+  if (bar) bar.classList.remove('show');
+  document.body.classList.remove('hasinstall');
+  installBarShown = false;
+}
+
+function bindInstall() {
+  // Service worker: makes the app installable and offline-capable
+  if ('serviceWorker' in navigator && location.protocol === 'https:') {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('sw.js').catch(function () {});
+    });
+  }
+  if (runningStandalone()) { setInstallMeta({ installed: true }); return; }
+
+  const bar = $('installBar');
+  if (!bar) return;
+
+  window.addEventListener('beforeinstallprompt', function (e) {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    showInstallBar();
+  });
+  window.addEventListener('appinstalled', function () {
+    setInstallMeta({ installed: true });
+    hideInstallBar();
+    toast(S.lang === 'bm' ? 'Dipasang! Buka dari skrin utama.' : 'Installed! Open it from your home screen.');
+  });
+
+  $('ibAdd').addEventListener('click', function () {
+    if (deferredInstallPrompt) {
+      deferredInstallPrompt.prompt();
+      deferredInstallPrompt.userChoice.then(function (res) {
+        if (res && res.outcome === 'accepted') {
+          setInstallMeta({ installed: true });
+          hideInstallBar();
+        } else {
+          setInstallMeta({ dismissedAt: Date.now() });
+          hideInstallBar();
+        }
+        deferredInstallPrompt = null;
+      }).catch(function () { deferredInstallPrompt = null; });
+      return;
+    }
+    if (isIOSDevice()) {
+      renderInstallText();
+      $('iosSheet').classList.add('show');
+      return;
+    }
+    // Desktop / unsupported browser: point at the menu
+    toast((INSTALL_TXT[S.lang] || INSTALL_TXT.en).hint);
+  });
+
+  $('ibClose').addEventListener('click', function () {
+    setInstallMeta({ dismissedAt: Date.now() });
+    hideInstallBar();
+  });
+
+  $('iosOk').addEventListener('click', function () {
+    $('iosSheet').classList.remove('show');
+    setInstallMeta({ dismissedAt: Date.now() });
+    hideInstallBar();
+  });
+  $('iosSheet').addEventListener('click', function (e) {
+    if (e.target === $('iosSheet')) $('iosSheet').classList.remove('show');
+  });
+
+  // iOS never fires beforeinstallprompt — offer the bar on a delay
+  const coarse = window.matchMedia('(pointer: coarse)').matches || window.innerWidth <= 820;
+  if (coarse) setTimeout(showInstallBar, isIOSDevice() ? 3500 : 6000);
+}
+
 function init() {
   bindEnding();
   bindWelcome();
+  bindInstall();
   bindMissionPopup();
   bindPrestigePopup();
   const hadSave = load();
