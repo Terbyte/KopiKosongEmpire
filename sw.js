@@ -1,6 +1,6 @@
 /* Kopi Kosong Empire — service worker
    Bump CACHE when shipping a build so clients pick up new assets. */
-const CACHE = 'kke-cache-2026.11.18-1';
+const CACHE = 'kke-cache-2026.11.18-2';
 const SHELL = [
   './',
   './index.html',
@@ -10,7 +10,9 @@ const SHELL = [
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-512.png',
-  './icons/apple-touch-icon-180.png'
+  './icons/apple-touch-icon-180.png',
+  './icons/apple-touch-icon-167.png',
+  './icons/apple-touch-icon-152.png'
 ];
 
 self.addEventListener('install', (e) => {

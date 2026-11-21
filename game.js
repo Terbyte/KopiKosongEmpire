@@ -272,7 +272,7 @@ const T = {
 /* ---------------- state ---------------- */
 const SHOW_STORE = false;   // fake IAP is hidden in the public/itch build
 
-const VERSION = '2026.11.18-1';
+const VERSION = '2026.11.18-2';
 const SAVE_KEY = 'kopitiam-kosong-v2';
 const OLD_KEY = 'kopitiam-kosong-v1';
 
